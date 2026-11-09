@@ -1,0 +1,213 @@
+/* ---------- Shared page pieces ---------- */
+
+.section {
+  margin-top: var(--space-6);
+}
+
+.sectionTitle {
+  margin-bottom: var(--space-4);
+  font-size: 22px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.textButton {
+  min-height: 44px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.textButton:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+/* ---------- Album actions and track filter ---------- */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.trackTools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.trackFilter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 220px;
+  max-width: 340px;
+}
+
+.trackFilter svg {
+  position: absolute;
+  left: 12px;
+  pointer-events: none;
+}
+
+.trackFilter input {
+  width: 100%;
+  height: 40px;
+  padding: 0 var(--space-3) 0 36px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.trackFilter input::placeholder {
+  color: var(--text-secondary);
+}
+
+.pageTitle {
+  font-size: 28px;
+  margin-bottom: var(--space-2);
+}
+
+.pageSubtitle {
+  margin-bottom: var(--space-5);
+  color: var(--text-secondary);
+}
+
+.loadMore {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-6);
+}
+
+.note {
+  margin-bottom: var(--space-4);
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.tabPanel {
+  margin-top: var(--space-5);
+}
+
+.inlineLink:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Home ---------- */
+
+.hero {
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-card);
+  background:
+    radial-gradient(circle at 85% 0%, rgb(139 92 246 / 0.28), transparent 55%),
+    radial-gradient(circle at 0% 100%, rgb(29 185 84 / 0.22), transparent 55%), var(--bg-secondary);
+}
+
+.heroTitle {
+  max-width: 18ch;
+  font-size: clamp(30px, 5vw, 52px);
+  font-weight: 800;
+}
+
+.heroAccent {
+  color: var(--accent);
+}
+
+.heroText {
+  max-width: 60ch;
+  margin-top: var(--space-4);
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+/* ---------- Artist and album headers ---------- */
+
+.detailHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  text-align: center;
+}
+
+.detailInfo {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.artistImage {
+  width: min(200px, 55vw);
+  flex-shrink: 0;
+}
+
+.albumCover {
+  width: min(260px, 70vw);
+  flex-shrink: 0;
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.55);
+  border-radius: var(--radius-sm);
+}
+
+.eyebrow {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.detailTitle {
+  font-size: clamp(30px, 5vw, 56px);
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.detailArtists {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.detailMeta {
+  color: var(--text-secondary);
+}
+
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+@media (min-width: 640px) {
+  .hero {
+    padding: var(--space-7) var(--space-6);
+  }
+
+  .detailHeader {
+    flex-direction: row;
+    align-items: flex-end;
+    text-align: left;
+  }
+
+  .detailInfo {
+    justify-items: start;
+  }
+
+  .badgeRow,
+  .actions {
+    justify-content: flex-start;
+  }
+}

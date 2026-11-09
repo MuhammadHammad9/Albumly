@@ -1,0 +1,121 @@
+.form {
+  position: relative;
+  flex: 1;
+  max-width: 480px;
+}
+
+.icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  height: 44px;
+  padding: 0 var(--space-4) 0 42px;
+  background: var(--bg-card);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.input::placeholder {
+  color: var(--text-secondary);
+}
+
+.input:hover {
+  background: var(--bg-hover);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.list {
+  position: absolute;
+  inset: calc(100% + var(--space-2)) 0 auto 0;
+  padding: var(--space-2);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.5);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.option[aria-selected='true'] {
+  background: var(--bg-hover);
+}
+
+.thumb {
+  flex-shrink: 0;
+  width: 40px;
+}
+
+.optionText {
+  display: grid;
+  min-width: 0;
+}
+
+.optionName {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.optionMeta,
+.status {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.status {
+  padding: var(--space-3) var(--space-2);
+}
+
+.heading {
+  padding: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.recent {
+  padding: var(--space-3) var(--space-2);
+  color: var(--text-secondary);
+}
+
+.recent[aria-selected='true'] {
+  color: var(--text-primary);
+}
+
+.seeAll {
+  margin-top: var(--space-1);
+  padding: var(--space-3) var(--space-2);
+  border-top: 1px solid var(--border-color);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.seeAll[aria-selected='true'] {
+  color: var(--text-primary);
+}

@@ -1,0 +1,165 @@
+/* Mobile first: one column with a bottom bar. The sidebar appears from 1024px up. */
+
+.shell {
+  min-height: 100dvh;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-bottom: var(--bottomnav-height);
+}
+
+.content {
+  flex: 1;
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-7);
+}
+
+/* ---------- Sidebar (desktop) ---------- */
+
+.sidebar {
+  display: none;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-5);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.brand svg,
+.navbarBrand svg {
+  color: var(--accent);
+}
+
+.navList {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-weight: 600;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.navLink:hover {
+  color: var(--text-primary);
+}
+
+.navLink[aria-current='page'] {
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+/* ---------- Top bar ---------- */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: var(--navbar-height);
+  padding: 0 var(--space-4);
+  background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.navbarBrand {
+  display: flex;
+  flex-shrink: 0;
+}
+
+/* ---------- Bottom bar (mobile) ---------- */
+
+.bottomNav {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 30;
+  display: flex;
+  height: var(--bottomnav-height);
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+}
+
+.bottomLink {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.bottomLink[aria-current='page'] {
+  color: var(--text-primary);
+}
+
+/* ---------- Footer ---------- */
+
+.footer {
+  padding: var(--space-5) var(--space-4);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+
+.demoNote {
+  margin-bottom: var(--space-1);
+  color: var(--accent);
+}
+
+/* ---------- Desktop ---------- */
+
+@media (min-width: 1024px) {
+  .sidebar {
+    display: block;
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--sidebar-width);
+    padding: var(--space-5) var(--space-3);
+    background: #000;
+    border-right: 1px solid var(--border-color);
+  }
+
+  .main {
+    margin-left: var(--sidebar-width);
+    padding-bottom: 0;
+  }
+
+  .content {
+    padding: var(--space-6) var(--space-6) var(--space-7);
+  }
+
+  .navbar {
+    padding: 0 var(--space-6);
+  }
+
+  .navbarBrand,
+  .bottomNav {
+    display: none;
+  }
+}

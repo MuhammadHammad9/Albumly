@@ -1,0 +1,175 @@
+/* The two series colours. Checked with the dataviz palette validator against the dark surface
+   (lightness band, colour-blind separation, contrast). The JS copy is in CompareChart.jsx. */
+.root {
+  --compare-a: #18a84b;
+  --compare-b: #8b5cf6;
+}
+
+.pickers {
+  display: grid;
+  gap: var(--space-3);
+  align-items: end;
+  margin: var(--space-5) 0;
+}
+
+.picker {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.pickerLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.pickerButtons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.swatchA {
+  composes: swatch;
+  background: var(--compare-a);
+}
+
+.swatchB {
+  composes: swatch;
+  background: var(--compare-b);
+}
+
+.heads {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.head {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.headCover {
+  width: min(160px, 100%);
+}
+
+.headTitle {
+  font-size: 17px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.headTitle:hover {
+  text-decoration: underline;
+}
+
+.headMeta {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.vs {
+  color: var(--text-secondary);
+  font-weight: 800;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table caption {
+  margin-bottom: var(--space-2);
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.table th,
+.table td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-color);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table th:first-child {
+  text-align: left;
+}
+
+.table thead th {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  vertical-align: bottom;
+}
+
+.columnName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 22ch;
+  white-space: normal;
+}
+
+.delta {
+  font-weight: 700;
+}
+
+.chart {
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-card);
+}
+
+.chartTitle {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.chartNote {
+  margin-bottom: var(--space-4);
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.hint {
+  margin-top: var(--space-4);
+  color: var(--text-secondary);
+}
+
+@media (min-width: 720px) {
+  .pickers {
+    grid-template-columns: 1fr 1fr auto;
+  }
+}

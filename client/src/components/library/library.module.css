@@ -1,0 +1,573 @@
+/* ---------- Save toggle on album cards ---------- */
+
+.cardItem {
+  position: relative;
+}
+
+/* Leaves room on the right for the save button, so it never covers text (or the artwork) */
+.cardText {
+  padding-right: 36px;
+}
+
+.cardNote {
+  margin-top: var(--space-1);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cardToggle {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+}
+
+.toggle {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--text-secondary);
+  border-radius: 50%;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.toggle:hover {
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+.toggle[aria-pressed='true'] {
+  color: var(--accent);
+}
+
+/* ---------- Confirm step (in place of window.confirm) ---------- */
+
+.confirmWrap {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.confirm {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 340px;
+  padding: var(--space-3);
+  background: var(--bg-card);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  text-align: left;
+}
+
+.confirmPopover {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--space-2));
+  z-index: 10;
+  width: min(260px, 80vw);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.6);
+}
+
+.confirmButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.danger {
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  background: var(--danger);
+  color: var(--text-on-accent);
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+}
+
+.subtle {
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-pill);
+}
+
+.subtle:hover {
+  border-color: var(--text-primary);
+}
+
+/* ---------- Library panel on the album page ---------- */
+
+.panel {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-card);
+}
+
+.panelHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.panelTitle {
+  font-size: 20px;
+}
+
+.savedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.panelGrid {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.fieldset {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  border: 0;
+}
+
+.legend {
+  margin-bottom: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* A native radio button dressed as a pill: the input stays in the page (keyboard and screen
+   readers work as normal), it is only made invisible */
+.pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  background: var(--bg-card);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.pill input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.pill:hover {
+  background: var(--bg-hover);
+}
+
+.pill:has(input:checked) {
+  background: var(--text-primary);
+  color: var(--text-on-accent);
+}
+
+.pill:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ratingPill {
+  composes: pill;
+  justify-content: center;
+  min-width: 36px;
+  padding: 0 var(--space-2);
+}
+
+.inlineForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.input,
+.textarea,
+.select {
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.input {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 96px;
+  padding: var(--space-2) var(--space-3);
+  resize: vertical;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+.smallButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  background: var(--bg-hover);
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+}
+
+.smallButton:hover {
+  background: var(--border-color);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px 4px 2px var(--space-3);
+  background: rgb(139 92 246 / 0.18);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+}
+
+.chipRemove {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--text-secondary);
+}
+
+.chipRemove:hover {
+  color: var(--text-primary);
+  background: rgb(255 255 255 / 0.1);
+}
+
+.message {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.warning {
+  color: #fbbf24;
+  font-size: 13px;
+}
+
+.error {
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.checkList {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  font-size: 14px;
+}
+
+.check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.noteField {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.noteHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+/* ---------- Library page ---------- */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-5) 0 var(--space-4);
+}
+
+.toolbar .input {
+  flex: 1 1 200px;
+  max-width: 320px;
+}
+
+.select {
+  padding-right: var(--space-2);
+}
+
+.resultLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.transfer {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-card);
+}
+
+.transfer summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.transferBody {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.fileInput {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.fileInput::file-selector-button {
+  margin-right: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  font-weight: 600;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.errorList {
+  display: grid;
+  gap: var(--space-1);
+  padding-left: var(--space-5);
+  list-style: disc;
+  font-size: 13px;
+}
+
+.errorList code {
+  color: var(--text-secondary);
+}
+
+/* ---------- Collections ---------- */
+
+.collectionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.collectionCard {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  align-items: center;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-3);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-card);
+}
+
+.collectionCard:hover {
+  background: var(--bg-hover);
+}
+
+.collectionName {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.emptyCover {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Sortable list on a collection page ---------- */
+
+.sortList {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.sortRow {
+  display: grid;
+  grid-template-columns: auto 24px 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.sortRow[data-dragging='true'] {
+  position: relative;
+  z-index: 5;
+  background: var(--bg-hover);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+}
+
+.handle {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 40px;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  cursor: grab;
+  touch-action: none; /* lets a finger drag the row instead of scrolling the page */
+}
+
+.handle:hover {
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+.position {
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: right;
+}
+
+.rowText {
+  display: grid;
+  min-width: 0;
+}
+
+.rowTitle {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowTitle:hover {
+  text-decoration: underline;
+}
+
+.rowMeta {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowActions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--text-secondary);
+  border-radius: 50%;
+}
+
+.iconButton:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+.iconButton:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+@media (max-width: 639px) {
+  .sortRow {
+    grid-template-columns: auto 40px minmax(0, 1fr) auto;
+  }
+
+  .position {
+    display: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .panelGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.column {
+  display: grid;
+  align-content: start;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.narrowForm {
+  max-width: 520px;
+}

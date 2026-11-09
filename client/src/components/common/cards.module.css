@@ -1,0 +1,54 @@
+.grid {
+  display: grid;
+  /* Two columns on phones; from there, as many 170px+ columns as the width allows */
+  grid-template-columns: repeat(auto-fill, minmax(min(170px, calc(50% - var(--space-2))), 1fr));
+  gap: var(--space-3);
+}
+
+.card {
+  display: block;
+  height: 100%;
+  padding: var(--space-3);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-card);
+  transition: background var(--transition-fast);
+}
+
+a.card:hover {
+  background: var(--bg-hover);
+}
+
+.title {
+  margin-top: var(--space-3);
+  font-size: 15px;
+  font-weight: 600;
+  /* Clamp long titles to two lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.meta {
+  margin-top: var(--space-1);
+  color: var(--text-secondary);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.artistCard {
+  composes: card;
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    gap: var(--space-4);
+  }
+
+  .card {
+    padding: var(--space-4);
+  }
+}
