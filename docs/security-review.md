@@ -60,6 +60,17 @@ The secret scan prints only `file:line` and the rule name, never the matched tex
 | 9 | Every authenticated cross-origin request sent a CORS preflight | `cors({ maxAge: 600 })` |
 | 10 | No share-preview tags | Open Graph and Twitter tags, `og-image.png`, `robots.txt`, `<noscript>` |
 
+## Attack pass, 2026-11-11
+
+The local API was attacked the way a hostile visitor would: malformed and oversized requests, forged and unsigned tokens, injection strings in every id and query, cross-origin calls, and attempts to reach admin and other users' data. Sign-in checks, the database rules (RLS), input validation, CORS and the client (no HTML-injection sinks, no open redirects) held. Four problems were found and fixed, each with a test that replays the attack:
+
+| # | Severity | Problem | Fix |
+| --- | --- | --- | --- |
+| 11 | High | **Spotify allowance could be drained by one visitor.** The per-IP limit counted API calls (300 per 5 minutes), but one uncached artist page can cost dozens of Spotify requests and every new search costs one. A script asking for random searches or artist ids could get the app blocked by Spotify for up to a day, for everyone | `services/spotify/upstreamBudget.js`: real Spotify requests are capped per visitor (120 per 10 minutes) and overall (600), checked just before each request leaves. Cached answers are not counted |
+| 12 | Medium | **Large uploads were read before the sign-in check.** Anyone could post 5 MB bodies to `/api/library/import` and make the server read and parse them | The large body is now read inside the route, after the rate limit and the sign-in check. A stranger gets 401 at once |
+| 13 | Low | `GET /api/search?type=constructor` (or `__proto__`) crashed the handler with a 500 | The type is checked with `Object.hasOwn`; answers 400 |
+| 14 | Low | `/api/health` showed cache and Spotify counters (including which endpoints Spotify is refusing) to everyone, which tells an attacker whether draining the allowance is working | In production the health check gives only status, catalogue and whether accounts are on. The numbers stay on the admin dashboard |
+
 ## Open items and accepted risks
 
 | # | Severity | Item | Status |
@@ -71,6 +82,9 @@ The secret scan prints only `file:line` and the rule name, never the matched tex
 | E | Info (accepted) | Render's disk is temporary, so the Spotify cache, block file and intelligence budget file reset on redeploy | Deploy on `CATALOG_PROVIDER=mock` first. A Redis store would fix it |
 | F | Info (accepted) | Device clocks decide "newest wins" sync conflicts; no tombstones | Documented in Phase 5 |
 | G | Info | Fonts still come from Google (visitor IP is shared with Google) | Self-hosting Inter would remove it; needs a font package (not installed) |
+| I | Medium (accepted while confirmation is off) | With `SIGNUP_EMAIL_CONFIRMATION=off` nobody proves they own an email address. Someone can register with another person's address, and one person can make many accounts (5 per hour per IP) to stuff battle votes. Sign-up also says when an email is already registered | Turn confirmation back on (with a real email sender) before a public launch that relies on votes |
+| J | Low (accepted) | A library file imported from someone else may hold links and cover addresses to any website. They show only in that user's own library; anything shown publicly is cut down to Spotify's hosts | Import only files you exported yourself |
+| K | Low (accepted) | The overall Spotify cap can be used up by an attacker with many addresses, which pauses new lookups for up to 10 minutes. Cached pages keep working, and this is far better than Spotify's day-long block | A CDN or bot protection in front of the API would help |
 | H | Before launch | The privacy page's contact is a placeholder address | Set `client/src/config/privacy.js` to a mailbox that exists |
 
 ## Lighthouse

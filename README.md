@@ -182,6 +182,7 @@ Albumly copes in several ways:
 - Compilations and guest appearances load only when their tab is opened.
 - It remembers blocks and never retries a blocked endpoint early.
 - Discover's "Look up" button has its own daily cap (`INTELLIGENCE_DAILY_REQUESTS`, default 30).
+- Real Spotify requests are capped per visitor and overall (`SPOTIFY_REQUESTS_PER_VISITOR`, `SPOTIFY_REQUESTS_OVERALL`), so nobody can spend the whole allowance with a script. Cached answers are never counted.
 
 Details: [docs/phase-2-concepts.md](docs/phase-2-concepts.md).
 
@@ -214,6 +215,8 @@ insert into public.app_admins (user_id) select id from auth.users where email = 
 | `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` | live data | the secret is | From the Spotify Developer Dashboard |
 | `SPOTIFY_MARKET` | optional | no | Two-letter country code; removes regional duplicates |
 | `INTELLIGENCE_DAILY_REQUESTS` | optional | no | Daily Spotify requests for Discover lookups (default 30, 0 = off) |
+| `SPOTIFY_REQUESTS_PER_VISITOR` | optional | no | Real Spotify requests one visitor may cause per 10 minutes (default 120) |
+| `SPOTIFY_REQUESTS_OVERALL` | optional | no | Real Spotify requests all visitors together may cause per 10 minutes (default 600) |
 | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` | accounts | no | Project URL and publishable key |
 | `SUPABASE_SECRET_KEY` | accounts | **yes** | Used only to delete accounts and, with the setting below, to create confirmed accounts |
 | `SIGNUP_EMAIL_CONFIRMATION` | accounts | no | `off`: the server creates accounts already confirmed, so sign-up sends no email (Supabase's built-in sender allows only a few per hour). Empty: Supabase's confirmation emails |

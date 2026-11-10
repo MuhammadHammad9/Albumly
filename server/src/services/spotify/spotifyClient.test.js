@@ -175,3 +175,16 @@ test('follows Spotify paging URLs but refuses any other host', async () => {
   expect(await client.get(`${API_BASE}/albums/x/tracks?offset=50`)).toEqual({ ok: true })
   await expect(client.get('https://evil.example/steal')).rejects.toThrow('non-Spotify URL')
 })
+
+test('asks the gate before every real request, and a refusal never reaches Spotify', async () => {
+  let allowed = 1
+  const refusal = Object.assign(new Error('over the cap'), { status: 429 })
+  const gate = () => {
+    if (allowed-- <= 0) throw refusal
+  }
+  const { client, fetch } = setup(() => json({ ok: true }), { gate })
+
+  await client.get('/artists/a')
+  await expect(client.get('/artists/b')).rejects.toBe(refusal)
+  expect(fetch.calls).toHaveLength(1)
+})

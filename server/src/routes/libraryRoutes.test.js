@@ -249,3 +249,28 @@ describe('POST /api/library/import', () => {
     expect(await library(a)).toEqual({ version: 1, entries: {}, collections: [] })
   })
 })
+
+describe('the large upload body', () => {
+  const post = (token, rawBody) => app.request('POST', '/api/library/import', { token, rawBody })
+
+  test('is not read for someone who is not signed in', async () => {
+    // 300 KB of broken JSON: had the server parsed it, the answer would be 400 (or 413)
+    const response = await post(undefined, '{' + 'x'.repeat(300_000))
+    expect(response.status).toBe(401)
+  })
+
+  test('is still accepted above the normal 100 KB limit for a signed-in user', async () => {
+    const big = entry('x1')
+    big.notes = 'n'.repeat(5000)
+    const entries = Object.fromEntries(Array.from({ length: 40 }, (_, i) => [`big${i}`, { ...big, album: { ...big.album, id: `big${i}` } }]))
+    const body = JSON.stringify({ library: { version: 1, entries, collections: [] } })
+    expect(body.length).toBeGreaterThan(100_000)
+    const response = await post(a, body)
+    expect(response.status).toBe(200)
+  })
+
+  test('everything else keeps the small limit', async () => {
+    const response = await app.request('POST', '/api/collections', { token: a, rawBody: JSON.stringify({ junk: 'x'.repeat(200_000) }) })
+    expect(response.status).toBe(413)
+  })
+})

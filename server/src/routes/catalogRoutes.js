@@ -23,7 +23,8 @@ catalogRoutes.get('/search', async (req, res) => {
   if (!q || q.length > 100) throw badRequest('"q" is required and must be at most 100 characters')
 
   const type = req.query.type ?? 'artist'
-  if (!SEARCHERS[type]) throw badRequest('"type" must be "artist", "album" or "track"')
+  // Object.hasOwn: "constructor" or "__proto__" must not pass as a type
+  if (typeof type !== 'string' || !Object.hasOwn(SEARCHERS, type)) throw badRequest('"type" must be "artist", "album" or "track"')
 
   const page = {
     offset: intParam(req.query.offset, { name: 'offset', fallback: 0, min: 0, max: MAX_OFFSET }),

@@ -170,3 +170,24 @@ test('unknown /api path returns the standard 404 error shape', async () => {
   expect(status).toBe(404)
   expect(body.error.code).toBe('not_found')
 })
+
+describe('hostile requests', () => {
+  test('a search type borrowed from Object ("constructor", "__proto__") is refused, not a crash', async () => {
+    for (const type of ['constructor', '__proto__', 'toString']) {
+      const { status, body } = await get(`/api/search?q=a&type=${type}`)
+      expect(status).toBe(400)
+      expect(body.error.code).toBe('bad_request')
+    }
+  })
+
+  test('in production the health check does not reveal cache or Spotify numbers', async () => {
+    const before = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+    try {
+      expect((await get('/api/health')).body).toEqual({ status: 'ok', provider: 'mock' })
+    } finally {
+      if (before === undefined) delete process.env.NODE_ENV
+      else process.env.NODE_ENV = before
+    }
+  })
+})

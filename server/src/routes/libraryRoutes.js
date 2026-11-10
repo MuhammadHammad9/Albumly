@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import express, { Router } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import { parse } from '../middleware/validate.js'
 import {
@@ -40,7 +40,8 @@ export function createLibraryRoutes({ verify, db }, limits) {
   })
 
   // Uploads a browser's library and merges it in (newest change wins)
-  router.post('/library/import', limits.import, auth, async (req, res) => {
+  // The body is read only after the limit and the sign-in check (see app.js)
+  router.post('/library/import', limits.import, auth, express.json({ limit: '5mb' }), async (req, res) => {
     const { library } = parse(importSchema, req.body)
     res.json(await asUser(req, (tx, userId) => repo.importLibrary(tx, userId, library)))
   })

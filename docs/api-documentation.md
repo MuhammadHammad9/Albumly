@@ -69,7 +69,8 @@ Liveness check, plus which catalogue is active.
 { "status": "ok", "provider": "mock" }
 ```
 
-- With the Spotify provider it also includes `cache` (hits, misses, size) and `spotify` (requests, average latency, retries, 429s, and endpoints currently blocked with seconds remaining).
+- In development, with the Spotify provider, it also includes `cache` (hits, misses, size) and `spotify` (requests, average latency, retries, 429s, and endpoints currently blocked with seconds remaining). In production (`NODE_ENV=production`) these are left out; admins see them on `/api/admin/metrics`.
+- Requests that need Spotify can answer `429 rate_limited` with `retryAfter` when a visitor, or everyone together, has caused too many real Spotify requests in 10 minutes. Cached answers are not affected.
 - `accounts: true` appears when accounts are configured.
 - CORS preflight answers may be cached by browsers for 10 minutes (`Access-Control-Max-Age: 600`).
 

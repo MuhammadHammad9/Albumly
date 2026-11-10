@@ -61,6 +61,8 @@ What `render.yaml` sets for you:
 | `CATALOG_PROVIDER` | `mock` | Demo catalogue first; see step 6 |
 | `TRUST_PROXY` | `1` | One proxy (Render's) sits in front of the app, so rate limits see each visitor's real address |
 | `INTELLIGENCE_DAILY_REQUESTS` | `30` | Most Spotify requests per day for Discover's "Look up" button (0 turns it off) |
+| `SPOTIFY_REQUESTS_PER_VISITOR` | `120` | Optional. Real Spotify requests one visitor may cause per 10 minutes |
+| `SPOTIFY_REQUESTS_OVERALL` | `600` | Optional. Real Spotify requests everyone together may cause per 10 minutes |
 
 ## Step 2: deploy the client on Vercel
 

@@ -8,6 +8,7 @@ import { createRequestMetrics } from './middleware/requestMetrics.js'
 import { createAccountRoutes } from './routes/accountRoutes.js'
 import { createAdminRoutes } from './routes/adminRoutes.js'
 import { catalogRoutes } from './routes/catalogRoutes.js'
+import { upstreamBudget as defaultUpstreamBudget } from './services/spotify/upstreamBudget.js'
 import { createCommunityRoutes } from './routes/communityRoutes.js'
 import { createIntelligenceRoutes } from './routes/intelligenceRoutes.js'
 import { createLibraryRoutes } from './routes/libraryRoutes.js'
@@ -23,7 +24,8 @@ const ACCOUNT_PATHS = ['/api/me', '/api/auth/signup', '/api/library', '/api/libr
 // accounts: { verify, db, authAdmin } when Supabase is configured, otherwise null (local-only mode).
 // rateLimits: false turns limiting off; an object overrides the defaults.
 // metrics: request counters for the admin dashboard (a fresh one per app, so tests don't share counts)
-export function createApp({ accounts = null, rateLimits, trustProxy, metrics = createRequestMetrics() } = {}) {
+// upstreamBudget: the cap on Spotify requests per visitor (tests pass their own)
+export function createApp({ accounts = null, rateLimits, trustProxy, metrics = createRequestMetrics(), upstreamBudget = defaultUpstreamBudget } = {}) {
   const app = express()
   const limits = createRateLimits(rateLimits)
 
@@ -39,15 +41,22 @@ export function createApp({ accounts = null, rateLimits, trustProxy, metrics = c
   // Authorization header, which needs a preflight when the client is on another address.
   app.use(cors({ origin: origins, maxAge: 600 }))
   app.use('/api', limits.general)
+  // From here on, Spotify requests made for this request count against this visitor's cap
+  app.use('/api', upstreamBudget.middleware)
 
-  // Only the library upload may be large; everything else stays small
-  app.use('/api/library/import', express.json({ limit: '5mb' }))
-  app.use(express.json({ limit: '100kb' }))
+  // Request bodies stay small. The one exception, the library upload, reads its (large) body
+  // inside its own route, after the sign-in check: a stranger cannot make the server read and
+  // parse megabytes.
+  const smallJson = express.json({ limit: '100kb' })
+  app.use((req, res, next) => (req.path === '/api/library/import' ? next() : smallJson(req, res, next)))
 
   app.get('/api/health', (req, res) => {
     const provider = getProvider()
-    // The Spotify provider also reports cache hits and Spotify request counts, handy for checking caching works
-    res.json({ status: 'ok', provider: provider.name, ...provider.stats?.(), ...(accounts && { accounts: true }) })
+    // In development the Spotify provider also reports cache hits and Spotify request counts,
+    // handy for checking that caching works. In production those numbers are for admins only
+    // (/api/admin/metrics): they would tell an attacker how close the Spotify allowance is to running out.
+    const details = process.env.NODE_ENV === 'production' ? {} : provider.stats?.()
+    res.json({ status: 'ok', provider: provider.name, ...details, ...(accounts && { accounts: true }) })
   })
 
   // Demo covers are images the client may load from another host in production

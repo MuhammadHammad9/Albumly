@@ -22,6 +22,7 @@ export function createSpotifyClient({
   random = Math.random,
   now = Date.now,
   blockStorage,
+  gate, // optional: called before every real request to Spotify; throws to refuse it (see upstreamBudget.js)
 }) {
   const counters = { requests: 0, retries: 0, rateLimited: 0, shortCircuited: 0, failures: 0, totalLatencyMs: 0 }
   const inFlight = new Map() // url -> promise, for de-duplication
@@ -85,6 +86,9 @@ export function createSpotifyClient({
         }
         await sleep(waitMs)
       }
+
+      // Our own cap on Spotify requests (per visitor and overall). Retries count too.
+      gate?.()
 
       const token = await tokenService.getToken()
       const started = now()

@@ -4,6 +4,7 @@ import { createFileStorage } from '../services/cache/fileStorage.js'
 import { createCache } from '../services/cache/lruCache.js'
 import { createSpotifyClient } from '../services/spotify/spotifyClient.js'
 import { createTokenService } from '../services/spotify/tokenService.js'
+import { upstreamBudget } from '../services/spotify/upstreamBudget.js'
 import { mockProvider } from './mockProvider.js'
 import { createSpotifyProvider } from './spotifyProvider.js'
 
@@ -27,6 +28,7 @@ function createSpotifyFromEnv() {
       tokenService: createTokenService({ clientId, clientSecret }),
       // Written immediately (no batching): a block must be on disk before the next restart
       blockStorage: createFileStorage(BLOCKS_FILE, { delayMs: 0 }),
+      gate: upstreamBudget.gate,
     }),
     cache: createCache({ maxEntries: 500, storage: createFileStorage(CACHE_FILE) }),
     market: market || undefined,
