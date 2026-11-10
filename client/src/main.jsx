@@ -1,9 +1,10 @@
 import './zodSetup.js'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router'
 import { router } from './router.jsx'
+import { queryClient } from './services/queryClient.js'
 import { session } from './services/session.js'
 import './styles/global.css'
 
@@ -17,19 +18,11 @@ font.rel = 'stylesheet'
 font.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=optional'
 document.head.append(font)
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      // Catalogue data changes rarely: reuse it for 5 minutes before refetching in the background
-      staleTime: 5 * 60 * 1000,
-      refetchOnWindowFocus: false,
-      // Retry once when the server is unreachable or failing; a 4xx will not get better by asking again
-      // (but never on a rate limit: asking again straight away is exactly what not to do)
-      retry: (failureCount, error) =>
-        failureCount < 1 && error.code !== 'rate_limited' && (error.status === 0 || error.status >= 500),
-    },
-  },
-})
+// While the app is starting up, lists appear at once instead of animating in (the entrance
+// styles check for this mark). Two seconds after the page has loaded the mark comes off, and
+// from then on cards and rows animate whenever they appear.
+document.documentElement.dataset.booting = ''
+window.addEventListener('load', () => setTimeout(() => delete document.documentElement.dataset.booting, 2000), { once: true })
 
 // Before the first render: a returning signed-in user sees their account library straight away
 session.start()

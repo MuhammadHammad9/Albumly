@@ -1,4 +1,4 @@
-/* Mobile first: one column with a bottom bar. The sidebar appears from 1024px up. */
+/* Mobile first: one column with a bottom bar. From 1024px the sidebar floats as a rounded panel. */
 
 .shell {
   min-height: 100dvh;
@@ -19,6 +19,18 @@
   padding: var(--space-5) var(--space-4) var(--space-7);
 }
 
+/* A page opened by a link fades in. Opacity only: moving the whole page would throw off the
+   cover that is gliding into its header at the same moment. */
+.pageEnter {
+  animation: pageEnter 360ms ease backwards;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+  }
+}
+
 /* ---------- Sidebar (desktop) ---------- */
 
 .sidebar {
@@ -29,43 +41,137 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-1) var(--space-3);
   margin-bottom: var(--space-5);
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 800;
   letter-spacing: -0.03em;
 }
 
-.brand svg,
+.brandMark {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--accent), #0e7a37);
+  color: var(--text-on-accent);
+  box-shadow: 0 6px 18px rgb(29 185 84 / 0.35);
+  transition:
+    transform 500ms var(--ease-spring),
+    box-shadow var(--transition-smooth);
+}
+
+/* The record in the logo takes a spin when you reach for it */
+.brandMark svg {
+  transition: transform 900ms var(--ease-out);
+}
+
+.brand:hover .brandMark {
+  transform: scale(1.08) rotate(-6deg);
+  box-shadow: 0 8px 26px rgb(29 185 84 / 0.55);
+}
+
+.brand:hover .brandMark svg {
+  transform: rotate(360deg);
+}
+
 .navbarBrand svg {
   color: var(--accent);
 }
 
+.sideNav {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.navHeading {
+  padding: 0 var(--space-3);
+  margin-bottom: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
 .navList {
   display: grid;
-  gap: var(--space-1);
+  gap: 2px;
 }
 
 .navLink {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3);
+  min-height: 42px;
+  padding: 0 var(--space-3);
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   font-weight: 600;
+  font-size: 14px;
   transition:
     color var(--transition-fast),
     background var(--transition-fast);
 }
 
+.navLink svg {
+  transition:
+    transform 320ms var(--ease-spring),
+    color var(--transition-fast);
+}
+
 .navLink:hover {
   color: var(--text-primary);
+  background: var(--bg-panel);
+}
+
+.navLink:hover svg {
+  transform: scale(1.18) rotate(-8deg);
+}
+
+.navLink:active {
+  transform: scale(0.97);
 }
 
 .navLink[aria-current='page'] {
   color: var(--text-primary);
-  background: var(--bg-card);
+  background: linear-gradient(90deg, var(--accent-soft), transparent 90%);
+}
+
+.navLink[aria-current='page'] svg {
+  color: var(--accent);
+}
+
+/* The thin accent bar beside the active link */
+.navLink[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  animation: barIn 420ms var(--ease-spring) backwards;
+}
+
+@keyframes barIn {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+.sideNote {
+  margin-top: auto;
+  padding: var(--space-3);
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.4;
+  opacity: 0.7;
 }
 
 /* ---------- Top bar ---------- */
@@ -79,8 +185,8 @@
   gap: var(--space-3);
   height: var(--navbar-height);
   padding: 0 var(--space-4);
-  background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
-  backdrop-filter: blur(12px);
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px) saturate(140%);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -97,7 +203,9 @@
   z-index: 30;
   display: flex;
   height: var(--bottomnav-height);
-  background: var(--bg-secondary);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px) saturate(140%);
   border-top: 1px solid var(--border-color);
 }
 
@@ -107,14 +215,59 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
+  min-width: 0;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
+}
+
+.bottomLink {
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.bottomLink svg {
+  transition: transform 320ms var(--ease-spring);
+}
+
+.bottomLink:active svg {
+  transform: scale(0.82);
 }
 
 .bottomLink[aria-current='page'] {
   color: var(--text-primary);
+}
+
+.bottomLink[aria-current='page'] svg {
+  color: var(--accent);
+  filter: drop-shadow(0 0 8px rgb(29 185 84 / 0.6));
+  animation: tabPop 420ms var(--ease-spring);
+}
+
+/* A short glowing line above the page you are on */
+.bottomLink[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 28px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  animation: lineIn 380ms var(--ease-spring) backwards;
+}
+
+@keyframes tabPop {
+  from {
+    transform: scale(0.6) translateY(4px);
+  }
+}
+
+@keyframes lineIn {
+  from {
+    transform: scaleX(0);
+  }
 }
 
 /* ---------- Footer ---------- */
@@ -123,30 +276,45 @@
   padding: var(--space-5) var(--space-4);
   border-top: 1px solid var(--border-color);
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12.5px;
   text-align: center;
 }
 
+.footer a:hover {
+  color: var(--text-primary);
+}
+
 .demoNote {
-  margin-bottom: var(--space-1);
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
   color: var(--accent);
+  font-weight: 600;
 }
 
 /* ---------- Desktop ---------- */
 
 @media (min-width: 1024px) {
   .sidebar {
-    display: block;
+    display: flex;
+    flex-direction: column;
     position: fixed;
-    inset: 0 auto 0 0;
+    top: var(--shell-gap);
+    bottom: var(--shell-gap);
+    left: var(--shell-gap);
     width: var(--sidebar-width);
-    padding: var(--space-5) var(--space-3);
-    background: #000;
-    border-right: 1px solid var(--border-color);
+    padding: var(--space-5) var(--space-3) var(--space-3);
+    overflow-y: auto;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
   }
 
   .main {
-    margin-left: var(--sidebar-width);
+    margin-left: calc(var(--sidebar-width) + var(--shell-gap));
     padding-bottom: 0;
   }
 
@@ -155,11 +323,56 @@
   }
 
   .navbar {
-    padding: 0 var(--space-6);
+    margin: var(--shell-gap) var(--shell-gap) 0;
+    top: var(--shell-gap);
+    height: 64px;
+    padding: 0 var(--space-4) 0 var(--space-5);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+  }
+
+  /* Covers the gap above the floating bar, so scrolled content never peeks out above it */
+  .navbar::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: calc(-1 * var(--shell-gap) - 1px);
+    right: calc(-1 * var(--shell-gap) - 1px);
+    top: calc(-1 * var(--shell-gap) - 1px);
+    height: calc(var(--shell-gap) + 32px);
+    background: linear-gradient(var(--bg-primary) 40%, transparent);
+    pointer-events: none;
   }
 
   .navbarBrand,
   .bottomNav {
     display: none;
+  }
+}
+
+/* The top bar turns more solid and gains a shadow as the page scrolls under it.
+   Driven by the scroll position itself, so it needs no script. */
+@supports (animation-timeline: scroll()) {
+  /* A darker, shadowed copy of the bar's surface that fades in on top of the glass one.
+     Only its opacity changes, which the browser can do without repainting anything. */
+  .navbar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: rgb(12 14 17 / 0.88);
+    box-shadow: 0 14px 40px rgb(0 0 0 / 0.55);
+    opacity: 0;
+    pointer-events: none;
+    animation: navbarScrolled linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 140px;
+  }
+
+  @keyframes navbarScrolled {
+    to {
+      opacity: 1;
+    }
   }
 }

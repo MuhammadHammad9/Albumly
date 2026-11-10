@@ -1,4 +1,4 @@
-import { Ban, CloudOff, Hourglass, KeyRound, TriangleAlert } from 'lucide-react'
+import { Ban, CloudOff, Hourglass, KeyRound, TriangleAlert, UserX } from 'lucide-react'
 
 // 45 -> "about a minute", 5400 -> "about 2 hours", 86280 -> "about 24 hours"
 export function describeWait(seconds) {
@@ -25,6 +25,13 @@ export function describeError(error) {
       return { icon: KeyRound, title: "Albumly can't connect to Spotify", message: "The server's Spotify credentials were rejected. This needs fixing on the server.", canRetry: false }
     case 'forbidden':
       return { icon: Ban, title: 'Spotify does not allow this', message: "Albumly's Spotify app is not permitted to show this item.", canRetry: false }
+    case 'accounts_unavailable':
+      return {
+        icon: UserX,
+        title: 'Accounts are switched off on this server',
+        message: 'This part of Albumly needs accounts. The server was started without its Supabase settings: add them to server/.env and restart it.',
+        canRetry: false,
+      }
     default:
       return { icon: TriangleAlert, title: 'Something went wrong', message: 'That did not load. Try again.', canRetry: true }
   }

@@ -7,7 +7,10 @@ create schema auth;
 -- Supabase keeps one row per account here
 create table auth.users (
   id uuid primary key,
-  email text
+  email text,
+  -- Also in Supabase's real table; read by the instant sign-up route
+  email_confirmed_at timestamptz,
+  last_sign_in_at timestamptz
 );
 
 -- The roles Supabase uses: signed-out visitors, signed-in users, and the all-powerful server key

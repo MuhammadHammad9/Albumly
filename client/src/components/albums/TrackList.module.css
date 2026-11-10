@@ -12,7 +12,17 @@
   text-transform: uppercase;
 }
 
+/* The tracklist sits on its own glass panel */
+.panel {
+  padding: var(--space-2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background:
+    radial-gradient(ellipse 60% 50% at 100% 0%, color-mix(in srgb, var(--ambient) 10%, transparent), transparent 70%), var(--bg-panel);
+}
+
 .row {
+  position: relative;
   display: grid;
   grid-template-columns: 28px 1fr auto 44px;
   align-items: center;
@@ -20,10 +30,128 @@
   min-height: 56px;
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
   border-radius: var(--radius-sm);
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-smooth);
+}
+
+/* The first rows slide in one after another (the rest are below the fold anyway). Like the
+   cards, this is a transition from a starting style, skipped while the app is starting up.
+   It moves `translate`, leaving `transform` free for the hover nudge, which must not be delayed. */
+.row:nth-child(-n + 10) {
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-smooth),
+    opacity 460ms var(--ease-out),
+    translate 460ms var(--ease-out);
+}
+
+.row:nth-child(2) {
+  transition-delay: 0s, 0s, 30ms, 30ms;
+}
+
+.row:nth-child(3) {
+  transition-delay: 0s, 0s, 60ms, 60ms;
+}
+
+.row:nth-child(4) {
+  transition-delay: 0s, 0s, 90ms, 90ms;
+}
+
+.row:nth-child(5) {
+  transition-delay: 0s, 0s, 120ms, 120ms;
+}
+
+.row:nth-child(6) {
+  transition-delay: 0s, 0s, 150ms, 150ms;
+}
+
+.row:nth-child(7) {
+  transition-delay: 0s, 0s, 180ms, 180ms;
+}
+
+.row:nth-child(8) {
+  transition-delay: 0s, 0s, 210ms, 210ms;
+}
+
+.row:nth-child(9) {
+  transition-delay: 0s, 0s, 240ms, 240ms;
+}
+
+.row:nth-child(10) {
+  transition-delay: 0s, 0s, 270ms, 270ms;
+}
+
+@starting-style {
+  :global(html:not([data-booting])) .row:nth-child(-n + 10) {
+    opacity: 0;
+    translate: -14px 0;
+  }
 }
 
 .row:hover {
-  background: var(--bg-card);
+  background: rgb(255 255 255 / 0.06);
+  transform: translateX(4px);
+}
+
+.row:hover .name {
+  color: var(--accent-hover);
+}
+
+/* Hovering a track swaps its number for little equaliser bars */
+.numberCell {
+  position: relative;
+  display: grid;
+  justify-items: end;
+}
+
+.bars {
+  position: absolute;
+  right: 0;
+  bottom: 3px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.bars i {
+  width: 3px;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--accent);
+  transform-origin: bottom;
+  transform: scaleY(0.3);
+}
+
+.row:hover .bars {
+  opacity: 1;
+}
+
+.row:hover .number {
+  opacity: 0;
+}
+
+.row:hover .bars i {
+  animation: bars 700ms ease-in-out infinite alternate;
+}
+
+.row:hover .bars i:nth-child(2) {
+  animation-duration: 520ms;
+  animation-delay: -200ms;
+}
+
+.row:hover .bars i:nth-child(3) {
+  animation-duration: 860ms;
+  animation-delay: -420ms;
+}
+
+@keyframes bars {
+  to {
+    transform: scaleY(1);
+  }
 }
 
 .number,
@@ -34,6 +162,7 @@
 
 .number {
   text-align: right;
+  transition: opacity var(--transition-fast);
 }
 
 .info {
@@ -43,6 +172,7 @@
 }
 
 .name {
+  transition: color var(--transition-fast);
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -71,6 +201,21 @@
   border-radius: 50%;
 }
 
+.external {
+  transition:
+    color var(--transition-fast),
+    transform 300ms var(--ease-spring),
+    background var(--transition-fast);
+}
+
 .external:hover {
   color: var(--accent);
+  background: var(--accent-soft);
+  transform: scale(1.12) rotate(8deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row:hover {
+    transform: none;
+  }
 }

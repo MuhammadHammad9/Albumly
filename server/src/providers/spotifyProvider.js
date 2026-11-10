@@ -10,7 +10,11 @@ const MINUTE = 60 * 1000
 const DAY = 24 * 60 * MINUTE
 // Discographies are the expensive call (Spotify allows few per day), and artists rarely release
 // more than once a week, so they are kept the longest.
-const TTL = { search: 10 * MINUTE, artist: DAY, discography: 7 * DAY, album: 7 * DAY, featured: DAY }
+const TTL = { search: 10 * MINUTE, artist: DAY, discography: 7 * DAY, album: 7 * DAY, featured: DAY, searchDiscography: 3 * 60 * MINUTE }
+
+// Backup discography while Spotify pauses its album-list endpoint: up to this many search pages
+const SEARCH_DISCOGRAPHY_PAGES = 5
+const SEARCH_GROUPS = { album: 'album', single: 'single', compilation: 'compilation' }
 
 const SPOTIFY_ID = /^[A-Za-z0-9]{22}$/
 const MAX_TRACK_PAGES = 20 // safety stop when following an album's track pages
@@ -80,6 +84,58 @@ export function createSpotifyProvider({ client, cache, market, featuredArtistIds
       return fetchGroup(client, artistId, group, { market, firstPage: first })
     })
 
+  // Albums and singles in full, but only page one of compilations and guest appearances (enough
+  // for Spotify's total). The rest of those comes from getDiscographyGroup when a tab is opened.
+  // Each group is cached on its own, so a failed group is the only one fetched again on retry.
+  async function fullDiscography(artistId) {
+    const pieces = await Promise.all(
+      RELEASE_GROUPS.map((group) => {
+        if (!LAZY_GROUPS.includes(group)) return fullGroup(artistId, group)
+        // Someone already opened this tab? Then the whole group is cached and costs nothing.
+        return cache.get(groupKey(artistId, group)) ?? firstPage(artistId, group)
+      }),
+    )
+    return mergeGroups(artistId, pieces)
+  }
+
+  // Releases found by searching for the artist's name, kept only when the artist is credited on
+  // them. Not complete (no guest appearances, at most 50 releases), so it is cached briefly and
+  // never under the real discography's keys: the full list replaces it once Spotify allows.
+  function searchDiscography(artistId) {
+    return cache.getOrLoad(`discography-search:${artistId}`, TTL.searchDiscography, async () => {
+      const artist = await getArtist(artistId)
+      const q = buildSearchQuery('', { artist: artist.name }).trim()
+      const byGroup = { album: [], single: [], compilation: [], appears_on: [] }
+      const seen = new Set()
+      let requests = 0
+      for (let page = 0; page < SEARCH_DISCOGRAPHY_PAGES; page++) {
+        requests++
+        const body = await client.get('/search', { params: { q, type: 'album', offset: page * 10, limit: 10, market } })
+        for (const raw of body.albums.items.filter(Boolean)) {
+          if (seen.has(raw.id) || !raw.artists?.some((credited) => credited.id === artistId)) continue
+          seen.add(raw.id)
+          const group = SEARCH_GROUPS[raw.album_type] ?? 'album'
+          byGroup[group].push(normalizeRelease(raw, group))
+        }
+        if (!body.albums.next) break
+      }
+      const fetchedAt = new Date().toISOString()
+      const pieces = RELEASE_GROUPS.map((group) => ({
+        group,
+        releases: byGroup[group],
+        reported: byGroup[group].length,
+        retrieved: byGroup[group].length,
+        complete: true,
+        truncated: false, // the notice for partial lists already says not everything is here
+        requests: group === 'album' ? requests : 0,
+        fetchedAt,
+      }))
+      const discography = mergeGroups(artistId, pieces, { source: 'spotify-search' })
+      discography.report.partial = true
+      return discography
+    })
+  }
+
   async function getArtist(id) {
     assertId(id, 'artist')
     return cache.getOrLoad(`artist:${id}`, TTL.artist, async () => normalizeArtist(await client.get(`/artists/${id}`, { notFound: 'Artist' })))
@@ -93,19 +149,20 @@ export function createSpotifyProvider({ client, cache, market, featuredArtistIds
     searchTracks: (query, page, filters) => search('track', query, page, filters),
     getArtist,
 
-    // Albums and singles in full, but only page one of compilations and guest appearances (enough
-    // for Spotify's total). The rest of those comes from getDiscographyGroup when a tab is opened.
-    // Each group is cached on its own, so a failed group is the only one fetched again on retry.
+    // The full discography, or while Spotify pauses album lists, what search can find
     async getDiscography(artistId) {
       assertId(artistId, 'artist')
-      const pieces = await Promise.all(
-        RELEASE_GROUPS.map((group) => {
-          if (!LAZY_GROUPS.includes(group)) return fullGroup(artistId, group)
-          // Someone already opened this tab? Then the whole group is cached and costs nothing.
-          return cache.get(groupKey(artistId, group)) ?? firstPage(artistId, group)
-        }),
-      )
-      return mergeGroups(artistId, pieces)
+      try {
+        return await fullDiscography(artistId)
+      } catch (error) {
+        // Spotify is pausing album lists (it allows only a few per day): show what search finds
+        if (error.code !== 'rate_limited') throw error
+        try {
+          return await searchDiscography(artistId)
+        } catch {
+          throw error // the backup failed too: report the original pause
+        }
+      }
     },
 
     async getDiscographyGroup(artistId, group) {
@@ -113,7 +170,6 @@ export function createSpotifyProvider({ client, cache, market, featuredArtistIds
       assertGroup(group)
       return { artistId, ...(await fullGroup(artistId, group)) }
     },
-
     async getAlbum(id) {
       assertId(id, 'album')
       return cache.getOrLoad(`album:${id}`, TTL.album, async () => {

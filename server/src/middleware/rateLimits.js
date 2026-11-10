@@ -7,6 +7,7 @@ export const DEFAULT_RATE_LIMITS = {
   general: { windowMs: 5 * 60 * 1000, limit: 300 }, // every /api request
   import: { windowMs: 60 * 60 * 1000, limit: 10 }, // POST /api/library/import
   deleteAccount: { windowMs: 60 * 60 * 1000, limit: 5 }, // DELETE /api/me
+  signup: { windowMs: 60 * 60 * 1000, limit: 5 }, // POST /api/auth/signup
 }
 
 function limiter({ windowMs, limit }) {
@@ -26,7 +27,7 @@ function limiter({ windowMs, limit }) {
 // settings: false turns limiting off (tests); otherwise the defaults with any overrides
 export function createRateLimits(settings = DEFAULT_RATE_LIMITS) {
   const pass = (req, res, next) => next()
-  if (settings === false) return { general: pass, import: pass, deleteAccount: pass }
+  if (settings === false) return { general: pass, import: pass, deleteAccount: pass, signup: pass }
   const merged = { ...DEFAULT_RATE_LIMITS, ...settings }
-  return { general: limiter(merged.general), import: limiter(merged.import), deleteAccount: limiter(merged.deleteAccount) }
+  return { general: limiter(merged.general), import: limiter(merged.import), deleteAccount: limiter(merged.deleteAccount), signup: limiter(merged.signup) }
 }

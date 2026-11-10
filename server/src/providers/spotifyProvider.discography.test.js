@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest'
 import { createCache } from '../services/cache/lruCache.js'
 import { createSpotifyClient } from '../services/spotify/spotifyClient.js'
-import { fakeFetch, fakeTokenService, json, rawAlbum } from '../services/spotify/fakeSpotify.js'
+import { fakeFetch, fakeTokenService, json, rawAlbum, rawArtist } from '../services/spotify/fakeSpotify.js'
 import { createSpotifyProvider } from './spotifyProvider.js'
 
 // Discography tests live in their own file so they never collide with edits to the search tests
@@ -80,4 +80,46 @@ test('an unknown group or malformed ID is rejected without a Spotify request', a
   await expect(provider.getDiscographyGroup(ARTIST, 'bootlegs')).rejects.toMatchObject({ status: 400 })
   await expect(provider.getDiscographyGroup('nope', 'compilation')).rejects.toMatchObject({ status: 400 })
   expect(fetch.calls).toHaveLength(0)
+})
+
+// While Spotify pauses /artists/{id}/albums, the discography comes from album search instead
+function setupPaused(searchItems) {
+  const fetch = fakeFetch((url) => {
+    if (url.pathname.endsWith('/albums') && url.pathname.includes('/artists/')) return json({}, { status: 429, headers: { 'Retry-After': '86000' } })
+    if (url.pathname.includes('/artists/')) return json(rawArtist(ARTIST, 'Paused Artist'))
+    const offset = Number(url.searchParams.get('offset'))
+    const items = searchItems.slice(offset, offset + 10)
+    return json({ albums: { items, total: searchItems.length, next: offset + 10 < searchItems.length ? 'more' : null } })
+  })
+  const client = createSpotifyClient({ tokenService: fakeTokenService(), fetch, sleep: async () => {} })
+  return { provider: createSpotifyProvider({ client, cache: createCache() }), fetch }
+}
+
+test('a paused album list falls back to search, keeping only releases the artist is credited on', async () => {
+  const { provider, fetch } = setupPaused([
+    ...albums('own', 12, { artist: ARTIST }),
+    ...albums('sg', 3, { artist: ARTIST, type: 'single', tracks: 1 }),
+    ...albums('x', 4, { artist: 'someone-else' }),
+  ])
+
+  const discography = await provider.getDiscography(ARTIST)
+
+  expect(discography.counts).toEqual({ album: 12, single: 3, compilation: 0, appears_on: 0 })
+  expect(discography.report).toMatchObject({ source: 'spotify-search', partial: true, pending: [] })
+  const searches = fetch.calls.filter((url) => url.includes('/search'))
+  expect(searches).toHaveLength(2) // 19 results, 10 per page
+  expect(new URL(searches[0]).searchParams.get('q')).toBe('artist:"Paused Artist"')
+
+  // Cached: a second visit costs nothing
+  const before = fetch.calls.length
+  await provider.getDiscography(ARTIST)
+  expect(fetch.calls.length).toBe(before)
+})
+
+test('a failure other than a pause is not hidden by the search backup', async () => {
+  const fetch = fakeFetch(() => json({ error: { status: 404 } }, { status: 404 }))
+  const client = createSpotifyClient({ tokenService: fakeTokenService(), fetch, sleep: async () => {} })
+  const provider = createSpotifyProvider({ client, cache: createCache() })
+  await expect(provider.getDiscography(ARTIST)).rejects.toMatchObject({ status: 404 })
+  expect(fetch.calls.some((url) => url.includes('/search'))).toBe(false)
 })

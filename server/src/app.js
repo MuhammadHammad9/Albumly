@@ -15,7 +15,7 @@ import { mockArtRoutes } from './routes/mockArtRoutes.js'
 import { ApiError } from './utils/errors.js'
 
 // Paths that need accounts. Without account settings they answer 503 instead of 404.
-const ACCOUNT_PATHS = ['/api/me', '/api/library', '/api/library/{*rest}', '/api/albums/:id/entry', '/api/collections', '/api/collections/{*rest}',
+const ACCOUNT_PATHS = ['/api/me', '/api/auth/signup', '/api/library', '/api/library/{*rest}', '/api/albums/:id/entry', '/api/collections', '/api/collections/{*rest}',
   '/api/public/{*rest}', '/api/battles', '/api/battles/{*rest}', '/api/leaderboard', '/api/reports', '/api/admin/{*rest}',
 ]
 

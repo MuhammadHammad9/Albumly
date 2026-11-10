@@ -20,7 +20,14 @@ function TrackRow({ track, albumArtistIds }) {
 
   return (
     <li className={s.row}>
-      <span className={s.number}>{track.trackNumber}</span>
+      <span className={s.numberCell}>
+        <span className={s.number}>{track.trackNumber}</span>
+        <span className={s.bars} aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </span>
+      </span>
       <div className={s.info}>
         <span className={s.name}>{track.name}</span>
         {(track.explicit || guests.length > 0) && (
@@ -60,7 +67,7 @@ export default function TrackList({ tracks, albumArtists }) {
   const multiDisc = discs.length > 1
 
   return (
-    <section aria-label="Tracklist">
+    <section aria-label="Tracklist" className={s.panel}>
       {discs.map(([discNumber, discTracks]) => (
         <div key={discNumber} className={s.disc}>
           {multiDisc && <h3 className={s.discTitle}>Disc {discNumber}</h3>}

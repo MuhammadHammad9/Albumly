@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { useCoverTransition } from '../../hooks/useCoverTransition.js'
 import { releaseTypeLabel } from '../../utils/format.js'
 import Artwork from '../common/Artwork.jsx'
 import s from '../common/cards.module.css'
@@ -13,11 +14,21 @@ export default function AlbumCard({ release, showArtist = false, note }) {
   const artistNames = release.artists.map((artist) => artist.name).join(', ')
   const details = [release.year, releaseTypeLabel(release.inferredType)]
   if (showArtist) details.push(artistNames)
+  const cover = useCoverTransition()
 
   return (
     <li className={lib.cardItem}>
-      <Link to={`/album/${release.id}`} className={s.card}>
-        <Artwork src={release.coverUrl} name={release.name} alt="" />
+      <Link
+        to={`/album/${release.id}`}
+        className={s.card}
+        data-spot=""
+        // The page cross-fades and this cover glides into the album header. `preview` lets the
+        // album page show the cover and title at once, before its own data has arrived.
+        viewTransition
+        state={{ preview: { name: release.name, coverUrl: release.coverUrl } }}
+        onClick={cover.mark}
+      >
+        <Artwork src={release.coverUrl} name={release.name} alt="" style={cover.style} />
         <div className={lib.cardText}>
           <h3 className={s.title}>{release.name}</h3>
           <p className={s.meta}>{details.filter(Boolean).join(' · ')}</p>

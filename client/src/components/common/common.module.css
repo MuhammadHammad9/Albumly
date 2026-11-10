@@ -12,6 +12,15 @@
   width: 100%;
   height: 100%;
   object-fit: contain; /* never crop catalogue artwork */
+  /* Fades in once it has arrived (Artwork marks it data-loaded) instead of popping in */
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+/* The big header picture is shown the instant it is ready: it is what the page is waiting for */
+.artwork img[data-loaded],
+.artwork img[loading='eager'] {
+  opacity: 1;
 }
 
 .round {
@@ -26,7 +35,7 @@
   display: grid;
   place-items: center;
   container-type: inline-size;
-  background: linear-gradient(135deg, #3a3a3a, #232323);
+  background: linear-gradient(135deg, #2b3038, #15181c);
   color: var(--text-secondary);
   font-weight: 700;
 }
@@ -60,7 +69,36 @@
   text-align: center;
 }
 
+/* Empty and error states settle into place rather than appearing flat. Movement only: on an
+   empty page this text is the main content, so it is readable from the first frame. */
+.state > * {
+  animation: stateIn 480ms var(--ease-out) backwards;
+}
+
+.state > :nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.state > :nth-child(3) {
+  animation-delay: 120ms;
+}
+
+.state > :nth-child(n + 4) {
+  animation-delay: 180ms;
+}
+
+@keyframes stateIn {
+  from {
+    transform: translateY(14px);
+  }
+}
+
 .stateIcon {
+  box-sizing: content-box;
+  padding: 14px;
+  border-radius: 50%;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
   color: var(--text-secondary);
 }
 
@@ -76,20 +114,42 @@
 /* ---------- Buttons ---------- */
 
 .button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   min-height: 44px;
   padding: 0 var(--space-5);
+  overflow: hidden;
   background: var(--text-primary);
+  font-size: 14px;
   color: var(--text-on-accent);
   font-weight: 700;
   border-radius: var(--radius-pill);
-  transition: transform var(--transition-fast);
+  transition:
+    transform 320ms var(--ease-spring),
+    box-shadow var(--transition-smooth),
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .button:hover {
-  transform: scale(1.03);
+  transform: translateY(-2px) scale(1.03);
+}
+
+/* Springs back when pressed */
+.button:active {
+  transform: scale(0.96);
+  transition-duration: 90ms;
+}
+
+/* The icon inside a button leans in on hover */
+.button svg {
+  transition: transform 320ms var(--ease-spring);
+}
+
+.button:hover svg {
+  transform: translateX(2px) scale(1.12);
 }
 
 .button:disabled {
@@ -101,21 +161,39 @@
 .buttonAccent {
   composes: button;
   background: var(--accent);
+  box-shadow: 0 8px 24px rgb(29 185 84 / 0.28);
 }
 
 .buttonAccent:hover {
   background: var(--accent-hover);
+  box-shadow: 0 12px 34px rgb(29 185 84 / 0.45);
+}
+
+/* A streak of light crosses the main button on hover */
+.buttonAccent::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.45) 50%, transparent 65%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+.buttonAccent:hover::after {
+  transform: translateX(120%);
+  transition: transform 700ms ease;
 }
 
 .buttonGhost {
   composes: button;
-  background: transparent;
+  background: var(--bg-panel);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
 }
 
 .buttonGhost:hover {
-  border-color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: rgb(255 255 255 / 0.07);
 }
 
 /* ---------- Badge ---------- */
@@ -123,11 +201,13 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px var(--space-2);
-  background: var(--bg-hover);
+  padding: 3px 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
+  letter-spacing: 0.02em;
   border-radius: var(--radius-pill);
   white-space: nowrap;
 }
@@ -135,6 +215,8 @@
 .badgeExplicit {
   composes: badge;
   padding: 0 5px;
+  border: none;
+  background: var(--bg-hover);
   border-radius: 3px;
   font-size: 10px;
 }
@@ -143,7 +225,7 @@
 
 .tabs {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-1);
   overflow-x: auto;
   padding: 3px; /* room for the focus ring inside the scroll container */
   margin: -3px;
@@ -155,26 +237,51 @@
   align-items: center;
   gap: var(--space-2);
   flex-shrink: 0;
-  min-height: 40px;
+  min-height: 38px;
   padding: 0 var(--space-4);
-  background: var(--bg-card);
-  color: var(--text-primary);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13.5px;
   border-radius: var(--radius-pill);
-  transition: background var(--transition-fast);
+  transition:
+    background var(--transition-smooth),
+    color var(--transition-fast),
+    border-color var(--transition-smooth),
+    transform 280ms var(--ease-spring),
+    box-shadow var(--transition-smooth);
 }
 
 .tab:hover {
-  background: var(--bg-hover);
+  color: var(--text-primary);
+  background: rgb(255 255 255 / 0.07);
+  transform: translateY(-1px);
+}
+
+.tab:active {
+  transform: scale(0.95);
 }
 
 .tab[aria-selected='true'] {
-  background: var(--text-primary);
+  background: var(--accent);
+  border-color: var(--accent);
   color: var(--text-on-accent);
+  box-shadow: 0 6px 20px rgb(29 185 84 / 0.3);
+  animation: tabPick 380ms var(--ease-spring);
+}
+
+@keyframes tabPick {
+  from {
+    transform: scale(0.9);
+  }
 }
 
 .tabCount {
   font-weight: 500;
-  opacity: 0.65;
+}
+
+/* Counts are quieter than the label, but still readable on both the plain and the green tab */
+.tab[aria-selected='false'] .tabCount {
+  opacity: 0.75;
 }

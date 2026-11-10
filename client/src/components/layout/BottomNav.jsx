@@ -7,7 +7,7 @@ export default function BottomNav() {
   return (
     <nav className={s.bottomNav} aria-label="Main">
       {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-        <NavLink key={to} to={to} end={end} className={s.bottomLink}>
+        <NavLink key={to} to={to} end={end} className={s.bottomLink} viewTransition>
           <Icon size={22} aria-hidden="true" />
           {label}
         </NavLink>

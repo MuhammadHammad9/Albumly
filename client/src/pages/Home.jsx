@@ -1,8 +1,10 @@
+import { Search, Sparkles } from 'lucide-react'
 import { Link } from 'react-router'
 import AlbumGrid from '../components/albums/AlbumGrid.jsx'
 import ArtistCard from '../components/artists/ArtistCard.jsx'
-import { CardGrid, CardGridSkeleton } from '../components/common/CardGrid.jsx'
+import { CardGridSkeleton, CardRail } from '../components/common/CardGrid.jsx'
 import { ErrorState, LoadingRegion } from '../components/common/Feedback.jsx'
+import common from '../components/common/common.module.css'
 import { useFeatured } from '../hooks/catalog.js'
 import { useEntries } from '../hooks/useLibrary.js'
 import { usePageTitle } from '../hooks/usePageTitle.js'
@@ -21,6 +23,20 @@ export default function Home() {
   return (
     <>
       <section className={s.hero}>
+        {/* Decoration only: drifting lights and a turning record, both drawn in CSS */}
+        <div className={s.heroAurora} aria-hidden="true" />
+        <div className={s.vinyl} aria-hidden="true">
+          <div className={s.vinylDisc} />
+        </div>
+        <p className={s.heroEyebrow}>
+          <span className={s.eq} aria-hidden="true">
+            <i />
+            <i />
+            <i />
+            <i />
+          </span>
+          Your discography explorer
+        </p>
         <h1 className={s.heroTitle}>
           Find every album. <span className={s.heroAccent}>Explore every era.</span>
         </h1>
@@ -28,6 +44,14 @@ export default function Home() {
           Search for an artist to see everything they have released: albums, singles, EPs, compilations and guest appearances, all in
           one place.
         </p>
+        <div className={s.heroActions}>
+          <Link to="/search" className={common.buttonAccent}>
+            <Search size={16} aria-hidden="true" /> Find an artist
+          </Link>
+          <Link to="/discover" className={common.buttonGhost}>
+            <Sparkles size={16} aria-hidden="true" /> Get recommendations
+          </Link>
+        </div>
       </section>
 
       {recentArtists.length > 0 && (
@@ -40,11 +64,11 @@ export default function Home() {
               Clear history
             </button>
           </div>
-          <CardGrid>
-            {recentArtists.slice(0, 6).map((artist) => (
+          <CardRail>
+            {recentArtists.slice(0, 12).map((artist) => (
               <ArtistCard key={artist.id} artist={artist} />
             ))}
-          </CardGrid>
+          </CardRail>
         </section>
       )}
 
@@ -66,7 +90,7 @@ export default function Home() {
         <LoadingRegion label="Loading featured music">
           <section className={s.section}>
             <h2 className={s.sectionTitle}>Featured artists</h2>
-            <CardGridSkeleton count={6} round />
+            <CardGridSkeleton count={6} round rail />
           </section>
           <section className={s.section}>
             <h2 className={s.sectionTitle}>Latest albums</h2>
@@ -83,11 +107,11 @@ export default function Home() {
             <h2 id="featured-artists" className={s.sectionTitle}>
               Featured artists
             </h2>
-            <CardGrid>
+            <CardRail>
               {featured.data.artists.map((artist) => (
                 <ArtistCard key={artist.id} artist={artist} />
               ))}
-            </CardGrid>
+            </CardRail>
           </section>
 
           {/* Empty when Spotify is limiting album lookups; hide it rather than show a bare heading */}

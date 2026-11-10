@@ -101,7 +101,7 @@ What `render.yaml` sets for you:
 
 Follow `docs/plans/phase-5-plan.md` §10 to create the Supabase project. Then:
 
-1. Render → Environment: set `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` and `DATABASE_URL`.
+1. Render → Environment: set `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` and `DATABASE_URL`. Add `SIGNUP_EMAIL_CONFIRMATION=off` unless you have connected your own SMTP email sender in Supabase.
 2. **SSL certificate**:
    - Render → your service → **Secret Files** → add a file named `supabase-ca.crt` with the certificate's contents.
    - Set `DATABASE_SSL_CA` to `/etc/secrets/supabase-ca.crt`.

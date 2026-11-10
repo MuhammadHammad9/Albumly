@@ -1,5 +1,13 @@
 @import './variables.css';
 
+/* The colour the page glows with. Album and artist pages set it from their artwork (see
+   useAmbient). Registered so it always has a value (green) when no page has set one. */
+@property --ambient {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1db954;
+}
+
 *,
 *::before,
 *::after {
@@ -12,12 +20,36 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg-primary);
+  /* Soft coloured glows behind everything, fixed so they stay put while the page scrolls */
+  background:
+    radial-gradient(50vw 45vh at 10% 110%, rgb(139 92 246 / 0.1), transparent 70%),
+    var(--bg-primary);
+  background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/* The big glow at the top of every page, in the --ambient colour. It is one layer of its own so
+   that fading from one colour to the next repaints only this layer. (Fading the --ambient value
+   itself would make the browser restyle the whole page on every frame.) */
+body::before {
+  content: '';
+  position: fixed;
+  z-index: -1;
+  /* Kept inside the screen (the mask places the glow up and to the right), so it can never
+     make the page scroll sideways */
+  top: 0;
+  right: 0;
+  width: 90vw;
+  height: 70vh;
+  background-color: var(--ambient);
+  opacity: 0.2;
+  mask-image: radial-gradient(ellipse 75% 85% at 80% 0%, #000, transparent 75%);
+  transition: background-color 900ms ease;
+  pointer-events: none;
 }
 
 h1,
@@ -64,6 +96,16 @@ ol {
   list-style: none;
 }
 
+::selection {
+  background: rgb(29 185 84 / 0.35);
+}
+
+/* Slim, quiet scrollbars that suit the dark panels */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.16) transparent;
+}
+
 /* One consistent, clearly visible focus ring for keyboard users */
 :focus-visible {
   outline: 2px solid var(--accent);
@@ -98,7 +140,35 @@ ol {
   white-space: nowrap;
 }
 
+/* ---------- Moving between pages ---------- */
+
+/* Links marked viewTransition cross-fade the page; a clicked cover glides into the header of the
+   page it opens (both carry the name "cover" for the length of the move) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 280ms;
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-group(cover) {
+  animation-duration: 460ms;
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-old(cover),
+::view-transition-new(cover) {
+  /* Keep the artwork's shape while it grows, instead of stretching it */
+  height: 100%;
+  object-fit: cover;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
   *,
   *::before,
   *::after {

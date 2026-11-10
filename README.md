@@ -215,7 +215,8 @@ insert into public.app_admins (user_id) select id from auth.users where email = 
 | `SPOTIFY_MARKET` | optional | no | Two-letter country code; removes regional duplicates |
 | `INTELLIGENCE_DAILY_REQUESTS` | optional | no | Daily Spotify requests for Discover lookups (default 30, 0 = off) |
 | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` | accounts | no | Project URL and publishable key |
-| `SUPABASE_SECRET_KEY` | accounts | **yes** | Used only to delete accounts |
+| `SUPABASE_SECRET_KEY` | accounts | **yes** | Used only to delete accounts and, with the setting below, to create confirmed accounts |
+| `SIGNUP_EMAIL_CONFIRMATION` | accounts | no | `off`: the server creates accounts already confirmed, so sign-up sends no email (Supabase's built-in sender allows only a few per hour). Empty: Supabase's confirmation emails |
 | `DATABASE_URL` | accounts | **yes** | Session-pooler connection string |
 | `DATABASE_SSL_CA` | accounts | no | Path to the downloaded CA certificate (required in production) |
 | `TRUST_PROXY` | hosting | no | Number of proxies in front of the API (usually `1`) |
@@ -271,7 +272,7 @@ The project is prepared for **Vercel** (client) and **Render** (API) but not dep
 
 ## Before launch
 
-- [ ] Set the privacy contact in `client/src/config/privacy.js`. It currently reads `[contact to be added]`.
+- [ ] Set the privacy contact in `client/src/config/privacy.js` to an address you really receive mail at. It currently holds a placeholder.
 - [ ] Replace `REPLACE-WITH-API-HOST.onrender.com` in `client/vercel.json` with the real API host.
 - [ ] Set `CLIENT_ORIGIN` (Render) and `VITE_API_BASE_URL` / `VITE_SITE_URL` (Vercel) to the real addresses.
 - [ ] With accounts: add the production URLs to Supabase's redirect settings, and add the SSL certificate as a Render secret file.

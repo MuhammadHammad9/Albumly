@@ -71,7 +71,7 @@ The secret scan prints only `file:line` and the rule name, never the matched tex
 | E | Info (accepted) | Render's disk is temporary, so the Spotify cache, block file and intelligence budget file reset on redeploy | Deploy on `CATALOG_PROVIDER=mock` first. A Redis store would fix it |
 | F | Info (accepted) | Device clocks decide "newest wins" sync conflicts; no tombstones | Documented in Phase 5 |
 | G | Info | Fonts still come from Google (visitor IP is shared with Google) | Self-hosting Inter would remove it; needs a font package (not installed) |
-| H | Before launch | The privacy page's contact is `[contact to be added]` | Set `client/src/config/privacy.js` |
+| H | Before launch | The privacy page's contact is a placeholder address | Set `client/src/config/privacy.js` to a mailbox that exists |
 
 ## Lighthouse
 

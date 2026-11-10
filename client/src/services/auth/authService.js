@@ -1,6 +1,7 @@
 // Sign-up, sign-in and sign-out, through Supabase Auth. The browser talks to Supabase directly for
 // this (only for this: library data always goes through our own API). The auth library is only
 // downloaded when accounts are configured, so it does not slow down the first page load.
+import { apiRequest } from '../api.js'
 import { AUTH_STORAGE_KEY, MIN_PASSWORD_LENGTH, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from './config.js'
 
 // The user id of a session saved by an earlier visit, read without loading the auth library.
@@ -20,7 +21,8 @@ const MESSAGES = {
   email_not_confirmed: 'Please confirm your email first: open the link we sent you.',
   user_already_exists: 'An account with this email already exists. Try signing in.',
   weak_password: `Choose a stronger password (at least ${MIN_PASSWORD_LENGTH} characters).`,
-  over_email_send_rate_limit: 'Too many emails were sent just now. Please wait a few minutes and try again.',
+  over_email_send_rate_limit:
+    'Albumly has sent as many emails as it can this hour, so it could not send the confirmation. Check your inbox (and spam) for an earlier link, or try again in about an hour.',
   over_request_rate_limit: 'Too many attempts. Please wait a minute and try again.',
   email_address_invalid: 'That email address does not look right.',
   same_password: 'The new password must be different from the old one.',
@@ -32,7 +34,8 @@ export function describeAuthError(error) {
   if (MESSAGES[error.code]) return MESSAGES[error.code]
   if (error.status === 0 || error.name === 'AuthRetryableFetchError') return "Can't reach the sign-in service. Check your connection and try again."
   if (error.status === 429) return MESSAGES.over_request_rate_limit
-  return 'Something went wrong. Please try again.'
+  // Unknown problem: show what Supabase said, so it can be acted on instead of guessed at
+  return error.message ? `Sign-in service error: ${error.message}` : 'Something went wrong. Please try again.'
 }
 
 async function loadSupabaseClient() {
@@ -52,7 +55,21 @@ const redirectUrl = () => `${globalThis.location?.origin ?? ''}/account`
 const toUser = (user) => (user ? { id: user.id, email: user.email ?? null } : null)
 
 // loadClient is swapped for a fake in tests
-export function createAuthService({ loadClient = loadSupabaseClient } = {}) {
+// Our server's sign-up (accounts created already confirmed). Answers { ok: true } when it created
+// the account, { unavailable: true } when the server leaves sign-up to Supabase's email flow.
+async function serverSignUp(email, password) {
+  try {
+    await apiRequest('POST', '/api/auth/signup', { body: { email, password } })
+    return { ok: true }
+  } catch (error) {
+    if (error.status === 404 || error.code === 'accounts_unavailable') return { unavailable: true }
+    if (error.code === 'rate_limited') return { ok: false, message: 'Too many sign-ups from here. Please wait a while and try again.' }
+    if (error.status === 0) return { ok: false, lostConnection: true, message: "Can't reach Albumly. Check your connection and try again." }
+    return { ok: false, message: error.message || 'Something went wrong. Please try again.' }
+  }
+}
+
+export function createAuthService({ loadClient = loadSupabaseClient, signUpOnServer = serverSignUp } = {}) {
   let clientPromise = null
   const client = () => (clientPromise ??= loadClient())
   const fail = (error) => ({ ok: false, message: describeAuthError(error) })
@@ -73,6 +90,20 @@ export function createAuthService({ loadClient = loadSupabaseClient } = {}) {
     },
 
     async signUp(email, password) {
+      const server = await signUpOnServer(email, password)
+      if (server.ok) {
+        // The account exists and is confirmed: sign straight in
+        const { error } = await (await client()).signInWithPassword({ email, password })
+        return error ? fail(error) : { ok: true, needsConfirmation: false }
+      }
+      if (server.lostConnection) {
+        // The connection dropped, perhaps after the account was already created: if signing in
+        // works, it was, and the sign-up is done
+        const { error } = await (await client()).signInWithPassword({ email, password })
+        if (!error) return { ok: true, needsConfirmation: false }
+      }
+      if (!server.unavailable) return { ok: false, message: server.message }
+
       const { data, error } = await (await client()).signUp({ email, password, options: { emailRedirectTo: redirectUrl() } })
       if (error) return fail(error)
       // No session yet means "check your email". (Supabase answers the same way for an email that

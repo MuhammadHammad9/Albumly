@@ -14,18 +14,28 @@ export function useArtistSearch(query) {
   return useCatalogSearch({ type: 'artist', q: query })
 }
 
+// Query definitions shared by the hooks below and by the router, which starts them early
+export const artistQuery = (id) => ({
+  queryKey: ['artist', id],
+  queryFn: ({ signal }) => apiGet(`/api/artists/${encodeURIComponent(id)}`, { signal }),
+})
+
+export const discographyQuery = (artistId) => ({
+  queryKey: ['discography', artistId],
+  queryFn: ({ signal }) => apiGet(`/api/artists/${encodeURIComponent(artistId)}/discography`, { signal }),
+})
+
+export const albumQuery = (id) => ({
+  queryKey: ['album', id],
+  queryFn: ({ signal }) => apiGet(`/api/albums/${encodeURIComponent(id)}`, { signal }),
+})
+
 export function useArtist(id) {
-  return useQuery({
-    queryKey: ['artist', id],
-    queryFn: ({ signal }) => apiGet(`/api/artists/${encodeURIComponent(id)}`, { signal }),
-  })
+  return useQuery(artistQuery(id))
 }
 
 export function useDiscography(artistId) {
-  return useQuery({
-    queryKey: ['discography', artistId],
-    queryFn: ({ signal }) => apiGet(`/api/artists/${encodeURIComponent(artistId)}/discography`, { signal }),
-  })
+  return useQuery(discographyQuery(artistId))
 }
 
 // Whole release groups (say, every compilation), each fetched only once `enabled` lists it.
@@ -46,10 +56,7 @@ export function useDiscographyGroups(artistId, groups, enabled) {
 }
 
 export function useAlbum(id) {
-  return useQuery({
-    queryKey: ['album', id],
-    queryFn: ({ signal }) => apiGet(`/api/albums/${encodeURIComponent(id)}`, { signal }),
-  })
+  return useQuery(albumQuery(id))
 }
 
 export function useFeatured() {

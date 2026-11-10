@@ -1,6 +1,6 @@
-import { Search, SearchX } from 'lucide-react'
+import { CalendarDays, Clock3, ListMusic, Search, SearchX } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useLocation, useParams } from 'react-router'
 import AlbumActions from '../components/albums/AlbumActions.jsx'
 import TrackList from '../components/albums/TrackList.jsx'
 import Artwork from '../components/common/Artwork.jsx'
@@ -8,6 +8,8 @@ import { EmptyState, ErrorState, LoadingRegion, Skeleton } from '../components/c
 import common from '../components/common/common.module.css'
 import LibraryPanel from '../components/library/LibraryPanel.jsx'
 import { useAlbum } from '../hooks/catalog.js'
+import { useAmbient } from '../hooks/useAmbient.js'
+import { useCoverTarget } from '../hooks/useCoverTransition.js'
 import { libraryActions, useEntry } from '../hooks/useLibrary.js'
 import { usePageTitle } from '../hooks/usePageTitle.js'
 import { formatLongDuration, formatReleaseDate, pluralize, releaseTypeLabel } from '../utils/format.js'
@@ -18,14 +20,28 @@ import s from './pages.module.css'
 // Short tracklists are easy to scan; the filter only earns its space on longer ones
 const MIN_TRACKS_FOR_FILTER = 8
 
-function AlbumSkeleton() {
+// `preview` is the cover and title of the card that was clicked, when there was one: they are
+// shown at once (the cover glides here from the card) while the rest of the album loads
+function AlbumSkeleton({ preview, coverTarget }) {
   return (
     <LoadingRegion label="Loading album">
       <div className={s.detailHeader}>
-        <Skeleton className={s.albumCover} style={{ aspectRatio: 1 }} />
+        {preview?.coverUrl ? (
+          <div className={s.albumCover} style={coverTarget}>
+            <Artwork src={preview.coverUrl} name={preview.name} alt="" eager />
+          </div>
+        ) : (
+          <Skeleton className={s.albumCover} style={{ aspectRatio: 1, ...coverTarget }} />
+        )}
         <div className={s.detailInfo}>
           <Skeleton style={{ height: 14, width: 60 }} />
-          <Skeleton style={{ height: 44, width: 'min(360px, 70vw)' }} />
+          {preview?.name ? (
+            <p className={s.previewTitle} aria-hidden="true">
+              {preview.name}
+            </p>
+          ) : (
+            <Skeleton style={{ height: 44, width: 'min(360px, 70vw)' }} />
+          )}
           <Skeleton style={{ height: 18, width: 220 }} />
         </div>
       </div>
@@ -70,12 +86,12 @@ function Tracks({ album }) {
 
 // A saved album that the catalogue no longer has: show what the library kept, so it can still be
 // rated or removed instead of vanishing behind a "not found" page
-function UnavailableAlbum({ snapshot }) {
+function UnavailableAlbum({ snapshot, coverTarget }) {
   const artistNames = snapshot.artists.map((artist) => artist.name).join(', ')
   return (
     <>
       <header className={s.detailHeader}>
-        <div className={s.albumCover}>
+        <div className={s.albumCover} style={coverTarget}>
           <Artwork src={snapshot.coverUrl} name={snapshot.name} alt={`${snapshot.name} by ${artistNames} cover`} eager />
         </div>
         <div className={s.detailInfo}>
@@ -97,16 +113,20 @@ export default function Album() {
   const { id } = useParams()
   const { data: album, isPending, isError, error, refetch } = useAlbum(id)
   const saved = useEntry(id)
+  const preview = useLocation().state?.preview
+  const coverTarget = useCoverTarget()
   usePageTitle(album?.name ?? saved?.album.name)
+  // The page glows in the cover's colour; the clicked card's cover is used until the album arrives
+  useAmbient(album?.coverUrl ?? saved?.album.coverUrl ?? preview?.coverUrl)
 
   // Viewing a saved album keeps its stored details current, at no extra cost
   useEffect(() => {
     if (album) libraryActions().refreshSnapshot(album)
   }, [album])
 
-  if (isPending) return <AlbumSkeleton />
+  if (isPending) return <AlbumSkeleton preview={preview} coverTarget={coverTarget} />
   if (error?.status === 404) {
-    if (saved) return <UnavailableAlbum snapshot={saved.album} />
+    if (saved) return <UnavailableAlbum snapshot={saved.album} coverTarget={coverTarget} />
     return <NotFound title="Album not found" message="This release is not in the catalogue. It may have been removed." />
   }
   if (isError) return <ErrorState error={error} onRetry={refetch} />
@@ -118,7 +138,7 @@ export default function Album() {
   return (
     <>
       <header className={s.detailHeader}>
-        <div className={s.albumCover}>
+        <div className={s.albumCover} style={coverTarget}>
           <Artwork src={album.coverUrl} name={album.name} alt={`${album.name} by ${artistNames} cover`} eager />
         </div>
         <div className={s.detailInfo}>
@@ -137,18 +157,26 @@ export default function Album() {
               </span>
             ))}
           </p>
-          <p className={s.detailMeta}>
-            {formatReleaseDate(album.releaseDate, album.precision)} · {pluralize(album.totalTracks, 'track')} ·{' '}
-            {formatLongDuration(album.totalDurationMs)}
+          <ul className={s.chipRow} aria-label="Release details">
+            <li className={s.chip}>
+              <CalendarDays size={14} aria-hidden="true" />
+              {formatReleaseDate(album.releaseDate, album.precision)}
+            </li>
+            <li className={s.chip}>
+              <ListMusic size={14} aria-hidden="true" />
+              {pluralize(album.totalTracks, 'track')}
+            </li>
+            <li className={s.chip}>
+              <Clock3 size={14} aria-hidden="true" />
+              {formatLongDuration(album.totalDurationMs)}
+            </li>
             {hasExplicitTracks && (
-              <>
-                {' · '}
-                <span className={common.badgeExplicit} title="Contains explicit tracks">
-                  E<span className="sr-only">xplicit</span>
-                </span>
-              </>
+              <li className={s.chip} title="Contains explicit tracks">
+                <span className={common.badgeExplicit}>E</span>
+                Explicit
+              </li>
             )}
-          </p>
+          </ul>
           <AlbumActions album={album} artistNames={artistNames} />
         </div>
       </header>

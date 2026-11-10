@@ -214,25 +214,97 @@
 /* ---------- Battle ---------- */
 
 .battle {
+  position: relative;
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-4);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-card);
+  padding: var(--space-5) var(--space-4);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  /* The two corners glow in the two sides' colours */
+  background:
+    radial-gradient(ellipse 50% 70% at 0% 0%, rgb(29 185 84 / 0.16), transparent 70%),
+    radial-gradient(ellipse 50% 70% at 100% 0%, rgb(139 92 246 / 0.2), transparent 70%), var(--bg-secondary);
+  animation: battleIn 560ms var(--ease-out) backwards;
 }
 
+@keyframes battleIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+}
+
+/* Covers stay a comfortable size on wide screens instead of filling half the page */
 .sides {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 300px) auto minmax(0, 300px);
+  justify-content: center;
   gap: var(--space-4);
   align-items: start;
 }
 
+/* "VS" on a ringed badge that pulses between the two covers */
 .versus {
+  position: relative;
   align-self: center;
-  color: var(--text-secondary);
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin-top: -90px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  font-size: 14px;
   font-weight: 800;
   letter-spacing: 0.08em;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.5);
+  animation: versusIn 700ms var(--ease-spring) 250ms backwards;
+}
+
+.versus::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: conic-gradient(var(--accent), var(--accent-secondary), var(--accent)) border-box;
+  mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: spinRing 5s linear infinite;
+}
+
+.versus::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  animation: pulseRing 2.4s ease-out infinite;
+}
+
+@keyframes versusIn {
+  from {
+    opacity: 0;
+    transform: scale(0.2) rotate(-90deg);
+  }
+}
+
+@keyframes spinRing {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulseRing {
+  to {
+    transform: scale(1.7);
+    opacity: 0;
+  }
 }
 
 .side {
@@ -242,10 +314,60 @@
   padding: var(--space-3);
   border-radius: var(--radius-card);
   border: 2px solid transparent;
+  transition:
+    transform var(--transition-smooth),
+    background var(--transition-fast),
+    border-color var(--transition-smooth),
+    box-shadow var(--transition-smooth);
+  animation: sideInLeft 620ms var(--ease-out) backwards;
+}
+
+/* The two albums come in from opposite sides, like fighters walking out */
+.side:last-child {
+  animation-name: sideInRight;
+}
+
+@keyframes sideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+}
+
+@keyframes sideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+
+.side > :first-child {
+  box-shadow: var(--shadow-card);
+  transition:
+    transform var(--transition-smooth),
+    box-shadow var(--transition-smooth);
+}
+
+.side:hover {
+  background: var(--bg-panel);
+}
+
+.side:hover > :first-child {
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: var(--shadow-lift);
 }
 
 .sidePicked {
   border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 40px rgb(29 185 84 / 0.25);
+  animation: picked 520ms var(--ease-spring);
+}
+
+@keyframes picked {
+  from {
+    transform: scale(0.94);
+  }
 }
 
 .voteButton {
@@ -278,13 +400,33 @@
 
 .barFill {
   height: 100%;
-  background: var(--accent-secondary);
+  background: linear-gradient(90deg, #6d3fe0, var(--accent-secondary));
   border-radius: var(--radius-pill);
-  transition: width 400ms ease;
+  transition: width 700ms var(--ease-out);
+  /* Fills up from empty when the result first appears */
+  animation: barGrow 1000ms var(--ease-out) backwards;
 }
 
 .barFillMine {
-  background: var(--accent);
+  background: linear-gradient(90deg, #128a3e, var(--accent-hover));
+  box-shadow: 0 0 16px rgb(29 185 84 / 0.5);
+}
+
+@keyframes barGrow {
+  from {
+    width: 0;
+  }
+}
+
+.result {
+  animation: resultIn 420ms var(--ease-out) backwards;
+}
+
+@keyframes resultIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -295,11 +437,12 @@
 
 @media (max-width: 640px) {
   .sides {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 320px);
   }
 
   .versus {
     justify-self: center;
+    margin-top: 0;
   }
 
   .albumRow {

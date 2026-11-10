@@ -4,7 +4,7 @@ import { createApp } from '../app.js'
 import { createTokenVerifier } from '../auth/verifyToken.js'
 import { TEST_ISSUER, createTestKeys } from './tokens.js'
 
-export async function startTestApp(db, { rateLimits = false, authAdmin } = {}) {
+export async function startTestApp(db, { rateLimits = false, authAdmin, instantSignup = false } = {}) {
   const keys = await createTestKeys()
   const verify = createTokenVerifier({ issuer: TEST_ISSUER, keySet: keys.keySet })
   const admin = authAdmin ?? {
@@ -15,7 +15,7 @@ export async function startTestApp(db, { rateLimits = false, authAdmin } = {}) {
     },
   }
 
-  const server = createApp({ accounts: { verify, db, authAdmin: admin }, rateLimits }).listen(0)
+  const server = createApp({ accounts: { verify, db, authAdmin: admin, instantSignup }, rateLimits }).listen(0)
   await new Promise((resolve) => server.once('listening', resolve))
   const baseUrl = `http://localhost:${server.address().port}`
 

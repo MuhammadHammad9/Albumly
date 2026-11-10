@@ -1,5 +1,5 @@
 import { Disc3, LoaderCircle, RotateCw, SearchX } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { useDiscography, useDiscographyGroups } from '../../hooks/catalog.js'
 import { LAZY_GROUPS, buildDiscographyTabs, mergeDiscography, pendingGroups } from '../../utils/discography.js'
@@ -40,10 +40,17 @@ const toYear = (value) => (value ? Number(value) : undefined)
 // discography on Spotify). The rest of a group is fetched when its tab is opened, or when the
 // user asks with a "Load" button. The All tab never fetches on its own: it is the default tab,
 // so doing that would make every visit pay the full price again.
+// How long a just-written address is trusted over the one the component last rendered with
+const RECENT_WRITE_MS = 1000
+
 export default function Discography({ artistId }) {
   const summary = useDiscography(artistId)
   const [searchParams, setSearchParams] = useSearchParams()
   const [requested, setRequested] = useState([]) // groups asked for with a Load button
+  // The address most recently asked for, and when. The address the component sees only catches
+  // up after the next render, so two quick changes (picking "from" then "to" year) must build on
+  // this, or the second would be made from the old address and undo the first.
+  const lastWrite = useRef(null)
 
   // Which groups to fetch in full: pending ones whose tab is open or that were asked for
   const tabParam = searchParams.get('tab')
@@ -85,11 +92,13 @@ export default function Discography({ artistId }) {
 
   // Write changes back: empty or default values are removed instead of stored
   function update(changes) {
-    const next = new URLSearchParams(searchParams)
+    const recent = lastWrite.current && Date.now() - lastWrite.current.at < RECENT_WRITE_MS
+    const next = new URLSearchParams(recent ? lastWrite.current.params : searchParams)
     for (const [key, value] of Object.entries(changes)) {
       if (!value || value === DEFAULTS[key]) next.delete(key)
       else next.set(key, value)
     }
+    lastWrite.current = { params: next, at: Date.now() }
     // replace: typing in the filter should not add a history entry per keystroke
     setSearchParams(next, { replace: true })
   }
@@ -109,6 +118,12 @@ export default function Discography({ artistId }) {
 
   return (
     <>
+      {report.partial && (
+        <p className={s.partialNote} role="note">
+          Spotify is limiting full discography lookups right now, so this list comes from Spotify search: the artist&rsquo;s
+          albums and singles, without guest appearances. The complete list loads by itself once the limit lifts.
+        </p>
+      )}
       <Tabs
         label="Release type"
         tabs={tabs.map((tab) => ({ key: tab.key, label: tab.label, count: tab.count }))}

@@ -1,3 +1,5 @@
+/* Artwork-led cards: the cover does the talking, the card surface only appears on hover */
+
 .grid {
   display: grid;
   /* Two columns on phones; from there, as many 170px+ columns as the width allows */
@@ -5,32 +7,233 @@
   gap: var(--space-3);
 }
 
-.card {
-  display: block;
-  height: 100%;
-  padding: var(--space-3);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-card);
-  transition: background var(--transition-fast);
+/* ---------- Rail: one row that scrolls sideways ---------- */
+
+.railWrap {
+  position: relative;
 }
 
-a.card:hover {
+.rail {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  /* Room for the hover lift and its shadow, which a scrolling box would otherwise clip */
+  padding: var(--space-2) 2px var(--space-5);
+  margin: calc(-1 * var(--space-2)) -2px calc(-1 * var(--space-5));
+}
+
+.rail > * {
+  flex: 0 0 clamp(138px, 42vw, 188px);
+  scroll-snap-align: start;
+}
+
+/* Cards fade out at an edge that has more to scroll to */
+.railWrap[data-more-end] .rail {
+  mask-image: linear-gradient(90deg, #000 calc(100% - 72px), transparent);
+}
+
+.railWrap[data-more-start] .rail {
+  mask-image: linear-gradient(90deg, transparent, #000 72px);
+}
+
+.railWrap[data-more-start][data-more-end] .rail {
+  mask-image: linear-gradient(90deg, transparent, #000 72px, #000 calc(100% - 72px), transparent);
+}
+
+.railButton {
+  position: absolute;
+  top: 34%;
+  z-index: 2;
+  display: none;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--bg-glass);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
+  transition:
+    transform var(--transition-smooth),
+    background var(--transition-fast);
+  animation: railButtonIn 260ms var(--ease-out) backwards;
+}
+
+.railButton:hover {
+  transform: scale(1.1);
   background: var(--bg-hover);
 }
 
+.railButton:active {
+  transform: scale(0.94);
+}
+
+.railPrev {
+  composes: railButton;
+  left: -12px;
+}
+
+.railNext {
+  composes: railButton;
+  right: -12px;
+}
+
+@keyframes railButtonIn {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+}
+
+/* Arrow buttons are for pointers; touch screens swipe */
+@media (hover: hover) and (min-width: 640px) {
+  .railButton {
+    display: grid;
+  }
+}
+
+/* ---------- Cards arrive one after another ---------- */
+
+/* A card that appears fades and rises into place, each a beat after the one before. Only the
+   first dozen: the rest start below the screen.
+   Written as a transition from a "starting style" rather than a keyframe animation so that it
+   can be skipped while the app is first starting up (html[data-booting], see main.jsx): then the
+   page should simply appear as fast as possible. Everything after that animates. */
+.grid > :nth-child(-n + 12),
+.rail > :nth-child(-n + 8) {
+  transition:
+    opacity 520ms var(--ease-out),
+    transform 520ms var(--ease-out);
+}
+
+.grid > :nth-child(2),
+.rail > :nth-child(2) {
+  transition-delay: 40ms;
+}
+
+.grid > :nth-child(3),
+.rail > :nth-child(3) {
+  transition-delay: 80ms;
+}
+
+.grid > :nth-child(4),
+.rail > :nth-child(4) {
+  transition-delay: 120ms;
+}
+
+.grid > :nth-child(5),
+.rail > :nth-child(5) {
+  transition-delay: 160ms;
+}
+
+.grid > :nth-child(6),
+.rail > :nth-child(6) {
+  transition-delay: 200ms;
+}
+
+.grid > :nth-child(7),
+.rail > :nth-child(7) {
+  transition-delay: 240ms;
+}
+
+.grid > :nth-child(8),
+.rail > :nth-child(8) {
+  transition-delay: 280ms;
+}
+
+.grid > :nth-child(n + 9),
+.rail > :nth-child(n + 9) {
+  transition-delay: 320ms;
+}
+
+@starting-style {
+  :global(html:not([data-booting])) .grid > :nth-child(-n + 12),
+  :global(html:not([data-booting])) .rail > :nth-child(-n + 8) {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+}
+
+/* ---------- Card ---------- */
+
+.card {
+  position: relative;
+  display: block;
+  height: 100%;
+  padding: var(--space-2);
+  border-radius: var(--radius-card);
+  border: 1px solid transparent;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-smooth);
+}
+
+/* A soft light under the pointer (position set by useSpotlight) */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 0%), rgb(255 255 255 / 0.09), transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-smooth);
+  pointer-events: none;
+}
+
+.card > :first-child {
+  position: relative;
+  box-shadow: var(--shadow-card);
+  transition:
+    transform var(--transition-smooth),
+    box-shadow var(--transition-smooth);
+}
+
+a.card:hover {
+  background: var(--bg-panel);
+  border-color: var(--border-color);
+}
+
+a.card:hover::before {
+  opacity: 1;
+}
+
+a.card:hover > :first-child {
+  transform: translateY(-6px);
+  box-shadow:
+    var(--shadow-lift),
+    0 0 0 1px rgb(255 255 255 / 0.1);
+}
+
+/* Pressing a card pushes it in a little, like a real button */
+a.card:active {
+  transform: scale(0.975);
+}
+
 .title {
+  position: relative;
   margin-top: var(--space-3);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   /* Clamp long titles to two lines */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  transition: color var(--transition-fast);
+}
+
+a.card:hover .title {
+  color: var(--accent-hover);
 }
 
 .meta {
-  margin-top: var(--space-1);
+  position: relative;
+  margin-top: 2px;
   color: var(--text-secondary);
   font-size: 13px;
   overflow: hidden;
@@ -43,12 +246,33 @@ a.card:hover {
   text-align: center;
 }
 
+/* Artist photos get a ring that lights up */
+.artistCard > :first-child {
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  transition:
+    transform var(--transition-smooth),
+    box-shadow var(--transition-smooth),
+    outline-color var(--transition-smooth);
+}
+
+a.artistCard:hover > :first-child {
+  outline-color: var(--accent);
+}
+
 @media (min-width: 640px) {
   .grid {
-    gap: var(--space-4);
+    gap: var(--space-4) var(--space-3);
   }
 
   .card {
-    padding: var(--space-4);
+    padding: var(--space-3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a.card:hover > :first-child,
+  a.card:active {
+    transform: none;
   }
 }

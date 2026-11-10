@@ -32,6 +32,9 @@ export function readAccountsConfig(env = process.env) {
     databaseUrl: env.DATABASE_URL.trim(),
     sslCaPath: isSet(env, 'DATABASE_SSL_CA') ? path.resolve(SERVER_DIR, env.DATABASE_SSL_CA.trim()) : null,
     production: env.NODE_ENV === 'production',
+    // SIGNUP_EMAIL_CONFIRMATION=off: our server creates accounts already confirmed, so sign-up
+    // never waits on an email (Supabase's built-in sender allows only a few per hour)
+    instantSignup: env.SIGNUP_EMAIL_CONFIRMATION?.trim().toLowerCase() === 'off',
   }
 }
 
@@ -53,5 +56,5 @@ export async function createAccounts(config) {
     getUserFromAuthServer: authAdmin.getUser,
   })
   const db = await createPgDatabase({ connectionString: config.databaseUrl, ssl: databaseSsl(config) })
-  return { verify, db, authAdmin }
+  return { verify, db, authAdmin, instantSignup: config.instantSignup }
 }

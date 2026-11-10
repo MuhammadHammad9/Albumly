@@ -5,8 +5,8 @@
   "author": "Muhammad Hammad",
   "type": "module",
   "scripts": {
-    "dev": "node --watch src/server.js",
-    "dev:demo": "node --watch scripts/dev-demo.js",
+    "dev": "node scripts/dev-watch.js src/server.js",
+    "dev:demo": "node scripts/dev-watch.js scripts/dev-demo.js",
     "start": "node src/server.js",
     "test": "vitest run",
     "spike": "node scripts/spike.js",
