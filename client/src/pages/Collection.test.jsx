@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { beforeEach, expect, test } from 'vitest'
@@ -10,14 +11,18 @@ function Location() {
   return <p data-testid="location">{location.pathname + location.search}</p>
 }
 
+// The page includes the Share panel, which loads data with TanStack Query (as in the real app)
 function renderCollection(id = 'c1') {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
-    <MemoryRouter initialEntries={[`/library/collections/${id}`]}>
-      <Routes>
-        <Route path="/library/collections/:id" element={<Collection />} />
-        <Route path="*" element={<Location />} />
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={[`/library/collections/${id}`]}>
+        <Routes>
+          <Route path="/library/collections/:id" element={<Collection />} />
+          <Route path="*" element={<Location />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 }
 

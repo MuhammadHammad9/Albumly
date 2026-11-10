@@ -30,7 +30,12 @@ export default function Discover() {
 
   const facets = useMemo(() => libraryFacets(entries), [entries])
   const genreOptions = useMemo(() => [...facets.tags, ...Object.values(genresByArtist).flat()], [facets.tags, genresByArtist])
-  const artistOptions = useMemo(() => [...facets.artists, ...recents.artists.map(({ id, name }) => ({ id, name }))], [facets.artists, recents.artists])
+  // Library artists first, then recently explored ones; an artist in both is offered once
+  const artistOptions = useMemo(() => {
+    const byId = new Map()
+    for (const { id, name } of [...facets.artists, ...recents.artists]) if (!byId.has(id)) byId.set(id, { id, name })
+    return [...byId.values()]
+  }, [facets.artists, recents.artists])
 
   return (
     <>

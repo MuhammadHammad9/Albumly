@@ -19,7 +19,8 @@ export default function Artwork({ src, alt, name, round = false, eager = false }
 
   return (
     <div className={className}>
-      <img src={src} alt={alt} loading={eager ? 'eager' : 'lazy'} onError={() => setFailed(true)} />
+      {/* eager images are the big header picture, usually the largest thing on screen: fetch it first */}
+      <img src={src} alt={alt} loading={eager ? 'eager' : 'lazy'} fetchPriority={eager ? 'high' : undefined} onError={() => setFailed(true)} />
     </div>
   )
 }

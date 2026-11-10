@@ -1,6 +1,6 @@
 # Albumly API
 
-_Draft covering the catalogue API (Releases 1–1.5) and the account endpoints that exist in code today. Intelligence and community endpoints are added in Phase 8 Part B._
+Every endpoint of the Albumly API: catalogue (Release 1), intelligence, accounts and library (Release 2), community and admin (Release 3).
 
 - **Base URL:**
   - Development: `http://localhost:5000` (the Vite dev server proxies `/api/*` to it).
@@ -24,8 +24,9 @@ Every error has the same shape:
 | --- | --- | --- |
 | 400 | `bad_request` | Invalid query parameter, malformed id, or a body that is not valid JSON |
 | 401 | `unauthorized` / `session_expired` | Account routes: missing, invalid or expired token |
+| 403 | `forbidden` | Admin routes for a signed-in user who is not an admin |
 | 404 | `not_found` | Unknown artist, album or route (also "someone else's" collection, never 403) |
-| 409 | `duplicate_name` | Account routes: a collection with that name exists |
+| 409 | `duplicate_name` / `already_voted` | A collection with that name exists / a second vote in the same battle |
 | 413 | `payload_too_large` | Body over 100 KB (5 MB for library import) |
 | 429 | `rate_limited` | Albumly's own per-IP limit, **or** Spotify has paused Albumly (then `retryAfter` can be hours) |
 | 502 | `upstream_error` | Spotify (or the demo catalogue's `!error` search) failed |
@@ -36,7 +37,7 @@ Every error has the same shape:
 ### Rate limits
 
 - Per IP address: **300 requests per 5 minutes** across `/api`.
-- Stricter: `POST /api/library/import` **10 per hour**, `DELETE /api/me` **5 per hour**.
+- Stricter, per IP per hour: `POST /api/library/import` **10**, `DELETE /api/me` **5**, `POST /api/battles` **20**, `POST /api/battles/:id/vote` **120**, `POST /api/reports` **20**.
 - Responses carry `RateLimit` and `RateLimit-Policy` headers (IETF draft-8).
 
 ### Security headers
@@ -70,6 +71,7 @@ Liveness check, plus which catalogue is active.
 
 - With the Spotify provider it also includes `cache` (hits, misses, size) and `spotify` (requests, average latency, retries, 429s, and endpoints currently blocked with seconds remaining).
 - `accounts: true` appears when accounts are configured.
+- CORS preflight answers may be cached by browsers for 10 minutes (`Access-Control-Max-Age: 600`).
 
 ### `GET /api/search`
 
@@ -191,3 +193,64 @@ Every route below needs `Authorization: Bearer <Supabase access token>`. They an
 | `PATCH /api/collections/:collectionId/order` | `{ albumIds, updatedAt }` | Same set, new order |
 
 Full design notes: `docs/plans/phase-5-plan.md` §4.
+
+---
+
+## Intelligence (Phase 6)
+
+### `GET /api/intelligence/artists`
+
+What the server already knows about some artists: their details (genres) and releases. Recommendations, the release calendar and the connection graph are computed **in the browser** from this plus the user's library.
+
+| Param | Required | Rules |
+| --- | --- | --- |
+| `ids` | yes | 1–40 comma-separated artist ids (letters, digits, dashes) |
+| `load` | no | 0–3, default 0. How many of the ids that are **not cached yet** to look up now |
+
+```json
+{
+  "mode": "mock",
+  "artists": [{ "id": "neon-harbor", "artist": { /* Artist */ }, "releases": [ /* ≤ 80 Release, newest first */ ], "source": "mock" },
+              { "id": "unknown-one", "artist": null, "releases": null, "source": null }],
+  "loaded": [],
+  "budget": { "limit": 30, "spent": 0, "remaining": 30, "resetsAt": "…" },
+  "stopped": null
+}
+```
+
+- `mode` is the catalogue (`mock` or `spotify`), or `unsupported` for a provider without this feature.
+- `load=0` (what pages use on open) **never calls Spotify**.
+- `load>0` (the "Look up" button) costs at most 2 Spotify requests per artist, under a server-wide daily budget (`INTELLIGENCE_DAILY_REQUESTS`, default 30).
+- `stopped` is `{ code: 'rate_limited', retryAfter }` or `{ code: 'budget_exhausted' }` when lookups had to stop early. The response is still 200 with whatever was found.
+
+---
+
+## Community (Phase 7)
+
+These answer **503 `accounts_unavailable`** when accounts are not configured.
+- "Optional sign-in": no `Authorization` header means a visitor, but a header that is present and wrong is still 401.
+- Album snapshots in shared collections and battles are cleaned again on the server, and only whitelisted fields leave it.
+
+| Method + path | Sign-in | Body / params | Result |
+| --- | --- | --- | --- |
+| `GET /api/public/collections/:slug` | no | — | `{ collection: { slug, name, description, updatedAt, includeReviews, albums: [{ album, rating?, review? }] } }` (ratings and reviews only when the owner turned them on). A private, hidden, unknown or malformed slug → 404. Sends `X-Robots-Tag: noindex` and `Cache-Control: public, max-age=30` |
+| `GET /api/collections/:collectionId/share` | yes | — | `{ share: { slug, visibility, includeReviews, hidden, hiddenReason } \| null }` |
+| `PUT /api/collections/:collectionId/share` | yes | `{ visibility: 'private'\|'public', includeReviews? }` | `{ share }`. The slug is made once on first publish and kept on rename |
+| `GET /api/battles` | optional | `view=recent\|vote` (vote needs sign-in), `limit` 1–50, `before` (ISO date) | `{ battles: [{ id, albumA, albumB, votesA, votesB, myVote, createdAt }] }` |
+| `POST /api/battles` | yes | `{ albumIds: [a, b] }`: two different albums from **your** library | 201 new or 200 existing (each pair exists once) |
+| `GET /api/battles/:battleId` | optional | — | `{ battle }` |
+| `POST /api/battles/:battleId/vote` | yes | `{ choice: 'a'\|'b' }` | 201 `{ battle }`; a second vote → 409 `already_voted` (enforced by the primary key) |
+| `GET /api/leaderboard` | no | `limit` 1–100 | Albums ranked by the Wilson lower bound of their win rate (minimum votes apply): `{ albums: [{ rank, album, wins, votes, winRate, score }], minVotes }` |
+| `POST /api/reports` | yes | `{ targetType: 'collection', slug }` or `{ targetType: 'review', slug, albumId }` or `{ targetType: 'battle', battleId }`, plus `reason` (`spam`, `offensive`, `personal_info`, `copyright`, `other`) and optional `details` (≤ 500) | 201, or 200 if you already reported it |
+
+## Admin (Phase 7)
+
+Admins are the users listed in `public.app_admins` (README: "Making yourself an admin"). Everything needs sign-in. A signed-in non-admin gets **403**.
+
+| Method + path | Result |
+| --- | --- |
+| `GET /api/admin/status` | `{ admin: true\|false }` (any signed-in user; used to decide what the page shows) |
+| `GET /api/admin/metrics` | In-memory counters since the last restart: requests by status, latency percentiles, top routes, a 60-minute timeline, 429s, Spotify and cache stats, and top searches (only queries made at least 3 times). `Cache-Control: no-store` |
+| `GET /api/admin/reports?status=open\|resolved` | The moderation queue |
+| `POST /api/admin/reports/:reportId/resolve` | `{ action: 'hide'\|'dismiss', reason? }` → 204 |
+| `DELETE /api/admin/hides/:type/:key` | Restore something hidden: `collection/<slug>`, `battle/<id>`, `review/<slug>:<albumId>` → 204 |

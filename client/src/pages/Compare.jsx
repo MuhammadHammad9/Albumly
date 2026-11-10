@@ -6,6 +6,7 @@ import { useStore } from 'zustand'
 import Artwork from '../components/common/Artwork.jsx'
 import { EmptyState, ErrorState, LoadingRegion, Skeleton } from '../components/common/Feedback.jsx'
 import CompareChart from '../components/compare/CompareChart.jsx'
+import StartBattleButton from '../components/community/StartBattleButton.jsx'
 import ComparePicker from '../components/compare/ComparePicker.jsx'
 import CompareTable from '../components/compare/CompareTable.jsx'
 import c from '../components/compare/compare.module.css'
@@ -136,6 +137,7 @@ export default function Compare() {
             <>
               <CompareTable albumA={albumA.data} albumB={albumB.data} />
               <CompareChart albumA={albumA.data} albumB={albumB.data} />
+              <StartBattleButton albumIds={[albumA.data.id, albumB.data.id]} />
             </>
           )}
 

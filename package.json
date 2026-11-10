@@ -2,7 +2,7 @@
   "name": "albumly",
   "private": true,
   "version": "0.0.0",
-  "author": "Muhammad Hammad <muhammad.hammad.03115@gmail.com>",
+  "author": "Muhammad Hammad",
   "scripts": {
     "dev": "concurrently -n client,server -c green,magenta \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
     "dev:demo": "concurrently -n client,server -c green,magenta \"npm run dev:demo --prefix client\" \"npm run dev:demo --prefix server\"",
@@ -12,6 +12,7 @@
     "install:all": "npm install && npm install --prefix client && npm install --prefix server",
     "test:e2e": "playwright test",
     "test:e2e:report": "playwright show-report e2e/playwright-report",
+    "test:lighthouse": "node scripts/lighthouse.js",
     "check:bundle": "node scripts/bundle-budget.js",
     "check:secrets": "node scripts/secret-scan.js",
     "check:audit": "node scripts/audit-report.js"
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
     "@playwright/test": "1.64.1",
-    "concurrently": "^10.0.7"
+    "concurrently": "^10.0.7",
+    "lighthouse": "13.5.0"
   }
 }

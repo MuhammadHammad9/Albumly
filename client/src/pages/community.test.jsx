@@ -80,9 +80,28 @@ test('battles: signed-out visitors start on Recent with results and can open the
   expect(await screen.findByText('Discovery')).toBeInTheDocument()
 })
 
-test('battles: without accounts the page explains why there is nothing', () => {
-  renderWith(<Battles api={{}} />, '/battles')
+test('battles: without accounts the page explains why there is nothing, and asks the server nothing', () => {
+  const api = { listBattles: vi.fn(), getLeaderboard: vi.fn() }
+  renderWith(<Battles api={api} />, '/battles?tab=leaderboard')
   expect(screen.getByText('Battles need accounts')).toBeInTheDocument()
+  expect(api.listBattles).not.toHaveBeenCalled()
+  expect(api.getLeaderboard).not.toHaveBeenCalled()
+})
+
+test('shared collection: without accounts it says sharing is not set up, without a request', () => {
+  const fetchSpy = vi.fn()
+  vi.stubGlobal('fetch', fetchSpy)
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter initialEntries={['/shared/late-night-k3x9q2mw']}>
+        <Routes>
+          <Route path="/shared/:slug" element={<PublicCollection />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  )
+  expect(screen.getByText("Sharing isn't set up on this server")).toBeInTheDocument()
+  expect(fetchSpy).not.toHaveBeenCalled()
 })
 
 // ---------- Admin ----------

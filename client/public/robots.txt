@@ -1,0 +1,6 @@
+# Albumly: everything public may be crawled. Shared collection pages are not blocked here on
+# purpose: they carry a "noindex" tag, which crawlers can only see if they may open the page.
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /account

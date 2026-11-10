@@ -16,7 +16,7 @@ beforeAll(async () => {
   })
   tokenA = await app.sign(USER_A)
   tokenB = await app.sign(USER_B)
-})
+}, 60_000) // starting PGlite can take several seconds when many test files start at once
 afterAll(async () => {
   await app.close()
   await db.close()

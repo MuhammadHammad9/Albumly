@@ -2,7 +2,7 @@
   "name": "client",
   "private": true,
   "version": "0.0.0",
-  "author": "Muhammad Hammad <muhammad.hammad.03115@gmail.com>",
+  "author": "Muhammad Hammad",
   "type": "module",
   "scripts": {
     "dev": "vite",

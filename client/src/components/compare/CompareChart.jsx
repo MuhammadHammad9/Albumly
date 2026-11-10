@@ -39,7 +39,7 @@ export default function CompareChart({ albumA, albumB }) {
       </figcaption>
       <div aria-hidden="true">
         <ResponsiveContainer width="100%" height={280}>
-          <LineChart data={data} margin={{ top: 8, right: 16, bottom: 4, left: -8 }}>
+          <LineChart data={data} margin={{ top: 8, right: 16, bottom: 4, left: -8 }} accessibilityLayer={false}>
             <CartesianGrid stroke="#2a2a2a" vertical={false} />
             <XAxis dataKey="position" {...axis} />
             <YAxis {...axis} width={44} tickFormatter={(minutes) => `${minutes}m`} allowDecimals={false} />

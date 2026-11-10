@@ -2,6 +2,7 @@ import { ListMusic, Pencil } from 'lucide-react'
 import { useId, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { EmptyState } from '../components/common/Feedback.jsx'
+import SharePanel from '../components/community/SharePanel.jsx'
 import ConfirmButton from '../components/library/ConfirmButton.jsx'
 import SortableAlbumList from '../components/library/SortableAlbumList.jsx'
 import lib from '../components/library/library.module.css'
@@ -111,6 +112,9 @@ export default function Collection() {
           Delete collection
         </ConfirmButton>
       </div>
+
+      {/* Public link settings; renders nothing when accounts aren't set up */}
+      <SharePanel collectionId={collection.id} />
 
       {albums.length === 0 ? (
         <EmptyState icon={ListMusic} title="This collection is empty" message="Open any album and tick this collection under “Your library” to add it." />

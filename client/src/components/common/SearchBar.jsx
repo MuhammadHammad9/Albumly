@@ -77,6 +77,8 @@ export default function SearchBar() {
       const step = event.key === 'ArrowDown' ? 1 : -1
       setActiveIndex((current) => (current + step + options.length) % options.length)
     } else if (event.key === 'Escape') {
+      // While the list is open, Escape only closes it (Chromium would otherwise also clear the text)
+      if (showList) event.preventDefault()
       setOpen(false)
       setActiveIndex(-1)
     }

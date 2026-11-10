@@ -1,6 +1,6 @@
 # Technical challenges
 
-_Draft (Phases 1–4). Each entry covers the problem, what made it hard, what Albumly does, the trade-off, and where to look in the code. Phase 8 Part B adds accounts, intelligence and community._
+Each entry covers the problem, what made it hard, what Albumly does, the trade-off, and where to look in the code.
 
 ## 1. Spotify took away most of the API
 
@@ -114,3 +114,67 @@ _Draft (Phases 1–4). Each entry covers the problem, what made it hard, what Al
 - `npm run check:bundle` measures the initial files after each build and fails if the budget is broken or a heavy library sneaks into the first load.
 
 **Code.** `client/src/router.jsx`, `scripts/bundle-budget.js`.
+
+## 11. One library, two homes, no lost edits
+
+**Problem.** The store expects a synchronous `load` and `save`, but the cloud is asynchronous, can be offline, and the same account can be open on two devices.
+**Solution.**
+- `apiRepository` keeps a per-user copy on the device, so the UI is instant and works offline.
+- It turns every change into a queue of small **idempotent** operations (safe to send twice). They are sent in a fixed order and each is applied to the "confirmed" copy as it succeeds, so a closed tab resumes where it stopped.
+- Conflicts use "newest `updatedAt` wins", with future timestamps clamped on the server.
+- The first sign-in offers to move the browser library into the account, as one merge transaction.
+
+**Trade-off.** Device clocks decide "newest", and there are no tombstones, so an album deleted on one device can come back from an offline device's queued edit. This is documented and acceptable at this scale.
+**Code.** `client/src/services/library/sync.js`, `apiRepository.js`, `server/src/services/library/merge.js`.
+
+## 12. Row-level security that also covers our own server
+
+**Problem.** The Supabase publishable key is public, so anyone could call Supabase's Data API directly. A forgotten `where user_id = …` in our own SQL would leak data.
+**Solution.**
+- Express verifies the JWT itself and runs every query inside `db.asUser()`. That is one transaction that switches to the `authenticated` role and sets the user id, so the same RLS policies Supabase uses filter **our** queries too.
+- CHECK constraints repeat the zod limits, so bad data cannot get in by another route.
+- Someone else's row is always a 404, never a 403, so ids cannot be probed.
+
+**Code.** `server/src/db/database.js`, `database/migrations/0002_rls.sql`; tested on PGlite in `server/src/db/rls.test.js`.
+
+## 13. Public collections without leaking private columns
+
+**Problem.** RLS decides about whole **rows**. A policy "anyone may read entries in a public collection" would also expose private notes, tags and statuses through the Data API.
+**Solution.**
+- A `security definer` function returns a fixed, whitelisted JSON shape for one slug.
+- No public policy opens `library_entries`.
+- Snapshots are cleaned again on the way out, and links are checked again in the browser.
+- One vote per user per battle is the votes table's **primary key**, so the database itself refuses a second vote.
+
+**Code.** `database/migrations/0003_community.sql`, `server/src/services/community/publicAlbum.js`, `client/src/utils/safeUrl.js`.
+
+## 14. Recommendations without a recommendations API
+
+**Problem.** Spotify gives new apps no recommendations, related artists or genres, and allows only about 100 discography pages a day.
+**Solution.**
+- Albumly builds a preference profile from the library: three vectors (genres/tags, decades, artists), compared with cosine similarity.
+- Candidates come only from discographies the server has already cached.
+- Every result has a written reason, and a result with no link to you scores 0 and is not shown.
+- Opening a page never calls Spotify. Only the "Look up" button does, at most 2 requests per artist, under a server-wide daily budget.
+
+**Code.** `client/src/utils/vectors.js`, `recommender.js`, `artistGraph.js`; `server/src/routes/intelligenceRoutes.js`, `server/src/services/intelligence/requestBudget.js`.
+
+## 15. Testing account flows without Supabase
+
+**Problem.** Sign-in normally needs a live Supabase project. Using it would make tests slow, flaky and dependent on secrets.
+**Solution.**
+- A second e2e API (`e2e-server.js --accounts`) uses PGlite (real Postgres in memory, with the real migrations and RLS) and a key pair made at start-up. Our real token verifier checks signature, issuer and expiry.
+- In the browser, Playwright answers Supabase Auth's requests itself (`e2e/support/fakeSupabase.js`), handing out tokens signed by that server.
+- The tests cover sign-in, a wrong password, sign-up confirmation, moving the browser library into the account, the same library in a second browser, sharing a collection with a logged-out visitor, admin refusal, and account deletion.
+
+**Code.** `server/scripts/e2e-server.js`, `e2e/support/fakeSupabase.js`, `e2e/tests/accounts/`.
+
+## 16. A strict Content Security Policy versus a validation library
+
+**Problem.** The production CSP allows scripts only from Albumly itself (no `eval`). Running the real build under the real headers (`e2e/tests/prod/`) showed a CSP violation on **every page**. zod 4 probes whether it may generate code with `new Function`; the probe is caught, but browsers still report it.
+**Solution.** `z.config({ jitless: true })` in `client/src/zodSetup.js`, imported by every module that uses zod, so it runs before any schema. The test now fails on any violation. Without that test, the first sign of the problem would have been console errors in production.
+
+## 17. Fonts versus first paint
+
+**Problem.** Lighthouse's mobile test showed the Google Fonts stylesheet blocking the first paint for about 0.9 s. Loading it later with `display=swap` then made the layout jump when the font arrived.
+**Solution.** The stylesheet is added from `main.jsx`, because the CSP forbids the usual inline `onload` trick, and uses `display=optional`. If Inter isn't ready almost immediately, the visit keeps the fallback font. There is no blocking and no jump; the next visit has Inter cached.

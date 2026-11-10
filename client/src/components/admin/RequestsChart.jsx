@@ -27,7 +27,8 @@ export default function RequestsChart({ timeline }) {
       </figcaption>
       <div aria-hidden="true">
         <ResponsiveContainer width="100%" height={220}>
-          <AreaChart data={data} margin={{ top: 8, right: 16, bottom: 4, left: -16 }}>
+          {/* accessibilityLayer off: inside aria-hidden, so it must not be focusable either */}
+          <AreaChart data={data} margin={{ top: 8, right: 16, bottom: 4, left: -16 }} accessibilityLayer={false}>
             <CartesianGrid stroke="#2a2a2a" vertical={false} />
             <XAxis dataKey="time" {...axis} interval={9} />
             <YAxis {...axis} width={44} allowDecimals={false} />

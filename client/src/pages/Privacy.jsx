@@ -24,13 +24,28 @@ export default function Privacy() {
       </ul>
       <p>The data is stored in a Supabase database. It is used only to run Albumly for you. We do not sell it, share it, show ads or use tracking.</p>
 
+      <h2>Sharing, battles and reports</h2>
+      <ul>
+        <li>
+          If you share a collection, its name, description and album list are visible to anyone with the link. Your ratings and reviews are included only if
+          you turn that on. Your private notes, tags and statuses are never shared.
+        </li>
+        <li>Battle votes are stored with your account so you can vote only once. Everyone sees only the totals, never who voted for what.</li>
+        <li>If you report a shared collection or review, the moderators see your report.</li>
+        <li>
+          The server counts requests and the most common searches to keep Albumly running well. Searches are counted only as text and a number, never with
+          who searched, and a search is only shown to the admin once it has been made at least 3 times.
+        </li>
+      </ul>
+
       <h2>Music data</h2>
       <p>Album and artist information comes from Spotify and links back to it. Albumly never asks you to sign in to Spotify and never sees your Spotify account.</p>
 
       <h2>Deleting your data</h2>
       <p>
-        Account → Delete account removes your account and everything saved in it, immediately and permanently. Signing out removes the copy of your
-        account library from that device.
+        Account → Delete account removes your account and everything saved in it, immediately and permanently: your library, your shared links, your
+        votes and your reports. Battles you started stay, but are no longer linked to you. Signing out removes the copy of your account library from that
+        device.
       </p>
 
       <h2>Contact</h2>

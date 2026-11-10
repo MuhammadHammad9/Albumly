@@ -37,7 +37,7 @@ test('the graph picture and the list show the same artists', () => {
       <ConnectionList graph={graph} search={search} rootId="kite-and-ember" />
     </>,
   )
-  expect(screen.getByRole('img', { name: `Connection map of ${search.order.length} artists` })).toBeInTheDocument()
+  expect(screen.getByRole('group', { name: `Connection map of ${search.order.length} artists` })).toBeInTheDocument()
   expect(screen.getByText(/via Wintering/)).toBeInTheDocument()
   expect(screen.getAllByRole('link', { name: 'Oda Lindqvist' }).length).toBe(2) // in the SVG and in the list
 })

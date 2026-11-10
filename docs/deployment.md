@@ -60,6 +60,7 @@ What `render.yaml` sets for you:
 | `NODE_VERSION` | `24` | Same major version as development |
 | `CATALOG_PROVIDER` | `mock` | Demo catalogue first; see step 6 |
 | `TRUST_PROXY` | `1` | One proxy (Render's) sits in front of the app, so rate limits see each visitor's real address |
+| `INTELLIGENCE_DAILY_REQUESTS` | `30` | Most Spotify requests per day for Discover's "Look up" button (0 turns it off) |
 
 ## Step 2: deploy the client on Vercel
 
@@ -70,6 +71,7 @@ What `render.yaml` sets for you:
    | Name | Value |
    | --- | --- |
    | `VITE_API_BASE_URL` | `<API_URL>` (no trailing slash) |
+   | `VITE_SITE_URL` | `<CLIENT_URL>`, so share previews get an absolute image link (`og:image`) |
    | `VITE_SUPABASE_URL` | empty, or `<SUPABASE_PROJECT_URL>` once accounts are set up |
    | `VITE_SUPABASE_PUBLISHABLE_KEY` | empty, or your Supabase **publishable** key (never the secret key) |
 
@@ -90,6 +92,7 @@ What `render.yaml` sets for you:
 | Search `neon` → open Neon Harbor → open Glass Arcade | Artist page, explorer and album page load |
 | Save an album → reload | It is still saved |
 | `<CLIENT_URL>/no-such-page` | Albumly's "Page not found", not a Vercel 404 |
+| `<CLIENT_URL>/robots.txt` and `<CLIENT_URL>/og-image.png` | Served as files (not the app) |
 | Browser dev tools → Console | No "Content Security Policy" errors |
 | `curl -I <CLIENT_URL>` | `content-security-policy`, `x-content-type-options: nosniff`, `strict-transport-security` |
 | `curl -I <API_URL>/api/health` | helmet headers, plus `ratelimit-policy` |
@@ -107,7 +110,8 @@ Follow `docs/plans/phase-5-plan.md` §10 to create the Supabase project. Then:
 4. Supabase → Authentication → URL Configuration:
    - Site URL = `<CLIENT_URL>`
    - add `<CLIENT_URL>/account` to Redirect URLs
-5. Run the migrations once from your computer: `npm run db:migrate --prefix server`, using your local `server/.env`.
+5. Run the migrations once from your computer: `npm run db:migrate --prefix server`, using your local `server/.env`. This applies `database/migrations/0001`–`0004`: library, RLS, community and community RLS.
+6. Optional, to open the admin dashboard at `<CLIENT_URL>/admin`: make your account an admin (README, "Making yourself an admin").
 
 ## Step 6 (optional): live Spotify data
 

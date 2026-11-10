@@ -6,12 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#101010" />
     <meta name="description" content="Albumly: search any artist and explore every album, single and EP they have released." />
+    <!-- How the link looks when shared (Open Graph, used by most chat apps and social sites).
+         With VITE_SITE_URL set at build time, vite.config.js makes the image address absolute. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Albumly" />
+    <meta property="og:title" content="Albumly: explore every release" />
+    <meta property="og:description" content="Search any artist and explore every album, single and EP they have released." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Albumly logo and the words: find every album, explore every era." />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- The Inter stylesheet is added by src/main.jsx, so the first paint does not wait for Google -->
     <title>Albumly</title>
   </head>
   <body>
+    <noscript>Albumly needs JavaScript to run. Please turn it on and reload the page.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

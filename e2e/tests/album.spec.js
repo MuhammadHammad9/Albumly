@@ -37,7 +37,9 @@ test('unknown album shows a not-found page', async ({ page }) => {
   await page.goto('/album/neon-harbor--does-not-exist')
   await expect(page.getByRole('heading', { name: 'Album not found' })).toBeVisible()
   await page.getByRole('link', { name: 'Back to home' }).click()
-  await expect(page.getByRole('heading', { name: 'Featured artists' })).toBeVisible()
+  // Home loads its featured data after the click; under a full parallel run that can take longer
+  await expect(page).toHaveURL(/\/$/)
+  await expect(page.getByRole('heading', { name: 'Featured artists' })).toBeVisible({ timeout: 15_000 })
 })
 
 test('unknown artist shows a not-found page', async ({ page }) => {

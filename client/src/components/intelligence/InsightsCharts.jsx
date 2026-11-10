@@ -18,7 +18,9 @@ function AlbumBars({ data, xKey, label }) {
   return (
     <div className={s.chart} aria-hidden="true">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
+        {/* accessibilityLayer off: the chart sits inside aria-hidden (the table beside it has the numbers),
+            so it must not be focusable either */}
+        <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }} accessibilityLayer={false}>
           <CartesianGrid vertical={false} stroke="#303030" />
           <XAxis dataKey={xKey} {...axis} />
           <YAxis allowDecimals={false} {...axis} />

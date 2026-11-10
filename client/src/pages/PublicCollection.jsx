@@ -36,7 +36,8 @@ export default function PublicCollection({ api = communityApi }) {
   const query = useQuery({
     queryKey: ['public-collection', slug],
     queryFn: ({ signal }) => apiGet(`/api/public/collections/${encodeURIComponent(slug)}`, { signal }),
-    enabled: validSlug,
+    // Without accounts (no Supabase settings) there is nothing to fetch: say so without asking
+    enabled: validSlug && status !== 'disabled',
     // A missing or private collection will not appear by retrying
     retry: (count, error) => error?.status !== 404 && error?.status !== 503 && count < 2,
   })
@@ -52,7 +53,7 @@ export default function PublicCollection({ api = communityApi }) {
       />
     )
   }
-  if (query.error?.code === 'accounts_unavailable') {
+  if (status === 'disabled' || query.error?.code === 'accounts_unavailable') {
     return <EmptyState icon={Link2Off} title="Sharing isn't set up on this server" message="Shared collections need accounts, which this server doesn't have turned on." />
   }
   if (query.error) return <ErrorState error={query.error} onRetry={() => query.refetch()} />

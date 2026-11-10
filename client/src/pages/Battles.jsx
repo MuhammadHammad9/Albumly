@@ -40,8 +40,10 @@ export default function Battles({ api = communityApi }) {
   const tab = TABS.some((item) => item.key === requested) ? requested : signedIn ? 'vote' : 'recent'
   const setTab = (key) => setParams({ tab: key }, { replace: true })
 
-  const battles = useBattles(api, { view: tab === 'leaderboard' ? 'recent' : tab, who: userId })
-  const leaderboard = useLeaderboard(api, tab === 'leaderboard')
+  // Without accounts there is nothing to load (the server would only answer "not set up")
+  const accountsOn = status !== 'disabled'
+  const battles = useBattles(api, { view: tab === 'leaderboard' ? 'recent' : tab, who: userId, enabled: accountsOn })
+  const leaderboard = useLeaderboard(api, accountsOn && tab === 'leaderboard')
   const vote = useVote(api)
   const create = useCreateBattle(api)
   const entries = useEntries()

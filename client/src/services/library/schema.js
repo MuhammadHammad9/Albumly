@@ -1,6 +1,7 @@
 // The shape of a saved library, written once with zod and used to check data from localStorage
 // and from imported files. Anything that does not match is rejected with a readable reason.
 import { z } from 'zod'
+import '../../zodSetup.js' // zod's code generation off, before any schema runs (CSP)
 import { LIMITS, STATUS_KEYS } from '../../utils/library.js'
 
 // Bump when the saved shape changes, and add a step to MIGRATIONS that upgrades the old shape

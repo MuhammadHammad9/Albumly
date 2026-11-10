@@ -314,3 +314,14 @@ No `package.json`, lockfile, `.env*`, `vite.config.js` or `.claude/launch.json` 
 - **PGlite column-level grants and `security definer`.** Expected to work (PGlite is real Postgres 17); checked first thing in Part B. Fallback: table-level grants plus a view-free design, reported to you.
 - **Fake accounts** can vote more than once. Email confirmation (Phase 5) is the mitigation; anything stronger is out of scope.
 - **Metrics reset on restart and are per process.** Fine for one server; documented.
+
+---
+
+## 11. Implementation notes (where the build differs from the plan above)
+
+- **Moderation writes go through `security definer` functions** (`admin_set_hidden`, `admin_resolve_report`, `admin_list_reports`, `admin_share_id`). Each one checks `is_admin()` itself. There are no admin RLS policies on the tables, so a bug in our routes still cannot let a normal user moderate. Owners have no `delete` right on `collection_shares`, so they cannot swap a hidden share for a fresh link.
+- **`review_hides` points at `auth.users`, not at `library_entries`.** Removing and re-adding an album therefore does not undo a hide.
+- **Reports use `reportable_share(slug, albumId)`** to find the share id. It only accepts reviews that are actually shown on the public page.
+- **Vote tab order is newest first** (not "fewest votes first"). Other people's votes are invisible under RLS, so sorting by totals would need one function call per battle. That can be added later.
+- **Extra endpoint:** `GET /api/battles/:battleId` (sign-in optional).
+- **Client.** `hooks/useCommunity.js` sends signed-in calls through `session.request` and public ones through `apiRequest`. Pages and components take an optional `api` prop so tests can pass a fake. The optional `StartBattleButton` is for the Compare page.

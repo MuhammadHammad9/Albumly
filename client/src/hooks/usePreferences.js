@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import { z } from 'zod'
+import '../zodSetup.js' // zod's code generation off, before any schema runs (CSP)
 import { EMPTY_QUIZ } from '../utils/preferences.js'
 import { DEFAULT_WEIGHTS, MAX_WEIGHT, sanitizeWeights } from '../utils/recommender.js'
 

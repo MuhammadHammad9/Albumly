@@ -307,3 +307,31 @@ e2e/
 - **Windows process cleanup.** Playwright kills the webServer process tree. If a stray `node` keeps 5066 or 5288 open, I'll report the PID, not kill other agents' processes.
 - **Lighthouse with the headless shell** may not be supported. Fallback in P9.
 - **The CSP breaks something in production** (for example, a Supabase or Spotify image host not listed). The Part B prod-preview test catches this locally, and the guide shows how to switch to `Content-Security-Policy-Report-Only` while debugging.
+
+---
+
+## Part A: what changed while building it (2026-11-10)
+
+- `rate-limit.spec.js` was dropped. It would have started a second in-process server on a random port, which the port rules don't allow. The 429 envelope is covered by Phase 5's server tests. It was replaced by `api-headers.spec.js`, which covers health, helmet headers, the error envelope, 503 for accounts and broken JSON → 4xx, all through the e2e API.
+- New `lazy-groups.spec.js` (Cass Marlowe's Appears On, Driftwood Recordings' compilations). It was split out of the explorer spec.
+- `scripts/package.json` (`"type": "module"`) was added so Node runs the scripts as ES modules without a warning.
+- The axe helper also writes each page's findings to `e2e/test-results/<test>/axe-<page>.json`.
+- Findings from the suite are in `docs/security-review.md`: Escape clears the search box, the empty Search page has no h1, and the Compare chart has an aria-hidden focus issue.
+
+## Part B: what was built (2026-11-10)
+
+- **Test servers.** Five servers instead of the planned two or three:
+  - API 5066 and client 5288 (accounts off)
+  - API 5067 (`e2e-server.js --accounts`: PGlite + a key pair made at start, plus a test-only `POST /__e2e/session` that plays Supabase Auth's part) and client 5289 (pretend Supabase settings passed as `VITE_` environment variables)
+  - production build + `vite preview` on 5290, with the `vercel.json` headers
+  - Playwright projects: `desktop`, `mobile`, `accounts`, `prod`, plus `lighthouse` (only via `npm run test:lighthouse`). `e2e/package.json` makes the e2e files ES modules.
+- **Browser side of accounts.** `e2e/support/fakeSupabase.js` answers the browser's Supabase Auth requests with tokens from the 5067 server.
+- **Accounts off, no requests.** The client no longer requests account-only endpoints when accounts are off (Battles, shared links). That removed the expected 503s instead of allowing them in the fixture.
+- **Lighthouse.** It runs inside Playwright using Playwright's Chromium (debugging port 9333). Mobile is the median of 3 runs. PRD targets apply everywhere except mobile performance, which has a floor of 80 (see `docs/security-review.md`).
+- **Fixes found by the new tests:**
+  - zod's `new Function` probe broke the CSP (fixed with `zodSetup.js`)
+  - focusable charts inside `aria-hidden`
+  - links inside `role="img"`
+  - render-blocking Google Fonts, and font-swap layout shift
+  - no confirmation after account deletion
+- **Canonical link not added.** On a single-page app, one canonical address for every route would tell search engines that all pages are copies of the home page. Instead, `VITE_SITE_URL` makes `og:image` absolute at build time.

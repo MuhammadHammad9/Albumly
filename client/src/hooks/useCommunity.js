@@ -37,11 +37,12 @@ export function useSaveShare(api, collectionId) {
 // ---------- Album Battle ----------
 
 // `who` is part of the key, so signing in or out loads the list again with or without "my vote"
-export function useBattles(api, { view, who }) {
+// enabled: false when the server has no accounts, so no request is made that can only fail
+export function useBattles(api, { view, who, enabled = true }) {
   return useQuery({
     queryKey: ['battles', view, who],
     queryFn: () => api.listBattles({ view, limit: 20 }),
-    enabled: view !== 'vote' || Boolean(who),
+    enabled: enabled && (view !== 'vote' || Boolean(who)),
   })
 }
 

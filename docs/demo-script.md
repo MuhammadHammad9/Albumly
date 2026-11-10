@@ -1,6 +1,6 @@
 # Demo video script
 
-_Draft for Phases 1–4 on the demo catalogue. Target length: 2½–3 minutes. Part B adds accounts, recommendations, insights and community._
+Target length: about 3½ minutes, on the demo catalogue. The account part (3:00–3:30) needs a Supabase project. Without one, skip it and end at 2:55.
 
 **Setup before recording**
 - Run `npm run dev:demo` (demo catalogue; no Spotify, so nothing can be rate-limited mid-take).
@@ -22,9 +22,13 @@ _Draft for Phases 1–4 on the demo catalogue. Target length: 2½–3 minutes. P
 | 2:00 | Back up or restore → Export JSON; import a file with rating 42 | "Export and import are strict. A broken file changes nothing and the report names the exact field." |
 | 2:15 | Glass Arcade → Add to compare → Afterimage → Compare with Glass Arcade | "Compare puts two albums side by side: the deltas in an accessible table, and track lengths in a chart that only downloads on this page." |
 | 2:30 | Search `neon harbor 2015 album` | "The search box understands structured queries: a tokenizer and parser turn this into artist text, a year and a type." |
+| 2:35 | Discover → open "Why this?" on a recommendation; then Insights | "Spotify gives new apps no recommendations or genres, so Albumly computes its own from your library: preference vectors, cosine similarity, and a written reason for every pick. Insights are about your Albumly library, never Spotify listening stats." |
+| 2:42 | Artist page → Eras → See connections | "Eras are chapters anchored on studio albums. The connection map is a breadth-first search over shared credits, capped so it never burns the Spotify budget." |
 | 2:40 | Switch to the mobile window: bottom navigation | "It's responsive, with a bottom bar on phones." |
 | 2:45 | Terminal: `npm run test:e2e` summary, then back to the app | "It's tested at every level: unit tests on the pure logic, Spotify behaviour against a fake, and a Playwright suite that drives the real app in Chromium on the demo catalogue." |
-| 2:55 | Footer | "Albumly is an independent project, not affiliated with Spotify. Thanks for watching." |
+| 2:55 | Footer | "Albumly is an independent project, not affiliated with Spotify." |
+| 3:00 | *(accounts on)* Account → sign in → "Add to account"; second browser window → same library | "With an account, the library syncs. The server verifies the sign-in token itself, and Postgres row-level security means one user can never read another's rows, even through our own queries." |
+| 3:15 | Collection → Share → open the link in a private window; Battles → vote | "Collections can be shared by link with a logged-out visitor. Album Battle allows one vote per person, a rule the database enforces itself. The leaderboard ranks by the Wilson score, so one lucky vote can't top it. Thanks for watching." |
 
 **Fallbacks while recording**
 - If a lazy chunk is slow on first open, cut; the second take loads from cache.

@@ -111,7 +111,7 @@ export default function Search() {
   if (request.q.length < MIN_QUERY_LENGTH) {
     return (
       <>
-        {raw && header}
+        {raw ? header : <h1 className={s.pageTitle}>Search</h1>}
         <EmptyState
           icon={SearchIcon}
           title="Search artists, albums and tracks"

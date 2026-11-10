@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
-import { afterEach, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+import { initialSession, sessionStore } from '../stores/sessionStore.js'
 import PublicCollection from './PublicCollection.jsx'
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
@@ -25,7 +26,12 @@ function renderAt(path) {
   )
 }
 
-afterEach(() => vi.unstubAllGlobals())
+// Accounts are on and the visitor is signed out (with accounts off the page makes no request at all)
+beforeEach(() => sessionStore.setState({ ...initialSession, status: 'signedOut' }))
+afterEach(() => {
+  vi.unstubAllGlobals()
+  sessionStore.setState({ ...initialSession })
+})
 
 const shared = {
   collection: { slug: 'road-trip-abc12345', name: 'Road trip', description: 'For long drives', updatedAt: '2026-11-10T12:00:00.000Z', includeReviews: false },

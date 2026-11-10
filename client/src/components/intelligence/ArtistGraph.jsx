@@ -14,7 +14,8 @@ export default function ArtistGraph({ graph, search, focusId }) {
   const maxDepth = Math.max(0, ...search.depth.values())
 
   return (
-    <svg className={s.graph} viewBox={`0 0 ${SIZE} ${SIZE}`} role="img" aria-label={`Connection map of ${search.order.length} artists`}>
+    // role="group", not "img": the artist names inside are links, and an image cannot contain links
+    <svg className={s.graph} viewBox={`0 0 ${SIZE} ${SIZE}`} role="group" aria-label={`Connection map of ${search.order.length} artists`}>
       {Array.from({ length: maxDepth }, (_, i) => (
         <circle key={i} cx={SIZE / 2} cy={SIZE / 2} r={((SIZE / 2 - 48) / maxDepth) * (i + 1)} fill="none" stroke="#303030" strokeDasharray="4 6" />
       ))}

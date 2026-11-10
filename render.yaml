@@ -20,6 +20,8 @@ services:
         value: mock # start on the demo catalogue; switch to "spotify" later (guide step 7)
       - key: TRUST_PROXY
         value: "1" # one proxy (Render's) in front of the app, so per-IP rate limits see real visitors
+      - key: INTELLIGENCE_DAILY_REQUESTS
+        value: "30" # Spotify requests per day for Discover's "Look up" button (0 turns it off)
       # The client's address, e.g. https://<your-vercel-project>.vercel.app (comma-separate several)
       - key: CLIENT_ORIGIN
         sync: false

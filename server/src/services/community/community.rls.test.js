@@ -8,9 +8,10 @@ import { applyMigrations } from '../../db/migrate.js'
 import { asVisitor } from './dbAccess.js'
 
 let db
+// Starting PGlite can take several seconds when many test files start at once
 beforeAll(async () => {
   db = await createTestDatabase()
-})
+}, 60_000)
 afterAll(() => db.close())
 beforeEach(() => resetTestDatabase(db))
 

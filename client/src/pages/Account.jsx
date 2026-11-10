@@ -31,6 +31,8 @@ export default function Account({ session = appSession }) {
   usePageTitle('Account')
   const status = useSession((state) => state.status)
   const [searchParams] = useSearchParams()
+  // Kept here (not in SignedIn), because SignedIn disappears the moment the account is gone
+  const [deleted, setDeleted] = useState(false)
 
   return (
     <>
@@ -53,12 +55,17 @@ export default function Account({ session = appSession }) {
           <AuthForm session={session} />
         </>
       )}
-      {status === 'signedIn' && <SignedIn session={session} />}
+      {deleted && status !== 'signedIn' && (
+        <p className={s.success} role="status">
+          Your account and all its data were deleted.
+        </p>
+      )}
+      {status === 'signedIn' && <SignedIn session={session} onDeleted={() => setDeleted(true)} />}
     </>
   )
 }
 
-function SignedIn({ session }) {
+function SignedIn({ session, onDeleted }) {
   const user = useSession((state) => state.user)
   const sync = useSession((state) => state.sync)
   const pending = useSession((state) => state.pending)
@@ -113,7 +120,13 @@ function SignedIn({ session }) {
         </div>
       </section>
 
-      <DeleteAccount email={user.email ?? me.data?.user.email} onDelete={() => session.deleteAccount()} />
+      <DeleteAccount
+        email={user.email ?? me.data?.user.email}
+        onDelete={async () => {
+          await session.deleteAccount()
+          onDeleted?.()
+        }}
+      />
     </>
   )
 }

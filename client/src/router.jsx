@@ -13,6 +13,9 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <AppShell />,
+    // Last safety net: a crash in the shell itself (navigation, footer) would otherwise show the
+    // router's built-in developer error screen
+    errorElement: <RouteError />,
     // Shown while the first lazy page is downloading; the shell itself appears immediately after
     HydrateFallback: () => null,
     children: [
@@ -33,6 +36,9 @@ export const router = createBrowserRouter([
           { path: 'discover/insights', lazy: page(() => import('./pages/Insights.jsx')) },
           { path: 'discover/calendar', lazy: page(() => import('./pages/ReleaseCalendar.jsx')) },
           { path: 'discover/connections', lazy: page(() => import('./pages/Connections.jsx')) },
+          { path: 'shared/:slug', lazy: page(() => import('./pages/PublicCollection.jsx')) },
+          { path: 'battles', lazy: page(() => import('./pages/Battles.jsx')) },
+          { path: 'admin', lazy: page(() => import('./pages/Admin.jsx')) },
           { path: '*', element: <NotFound /> },
         ],
       },
