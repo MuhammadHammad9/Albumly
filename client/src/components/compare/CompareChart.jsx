@@ -50,7 +50,8 @@ export default function CompareChart({ albumA, albumB }) {
               labelFormatter={(position) => `Track ${position}`}
               formatter={(minutes) => formatDuration(minutes * 60000)}
             />
-            <Legend formatter={(name) => <span style={textColor}>{name}</span>} />
+            {/* itemSorter: keep album A before album B (the default sorts by name) */}
+            <Legend itemSorter="dataKey" formatter={(name) => <span style={textColor}>{name}</span>} />
             {line('a', albumA.name, COLOR_A)}
             {line('b', albumB.name, COLOR_B)}
           </LineChart>

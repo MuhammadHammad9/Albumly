@@ -1,5 +1,6 @@
 import { LAZY_GROUPS, RELEASE_GROUPS, fetchGroup, mergeGroups } from '../services/catalog/discographyService.js'
 import { normalizeArtist, normalizeRelease, normalizeTrack } from '../services/spotify/normalize.js'
+import { createSpotifyIntelligence } from '../services/intelligence/spotifyIntelligence.js'
 import { badRequest } from '../utils/errors.js'
 
 // The real catalogue. Same methods and return shapes as mockProvider, backed by the Spotify
@@ -166,5 +167,8 @@ export function createSpotifyProvider({ client, cache, market, featuredArtistIds
     },
 
     stats: () => ({ cache: cache.stats(), spotify: client.stats() }),
+
+    // Budgeted artist lookups for recommendations, the graph and the calendar (Phase 6)
+    ...createSpotifyIntelligence({ cache, client, market }),
   }
 }

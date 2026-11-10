@@ -1,0 +1,43 @@
+# Render Blueprint for the Albumly API (Express). Nothing here is secret.
+# Values marked `sync: false` are typed into the Render dashboard when the Blueprint is created;
+# they never live in git. Step-by-step guide: docs/deployment.md
+services:
+  - type: web
+    name: albumly-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: false # deploy by hand until the setup is proven
+    envVars:
+      - key: NODE_ENV
+        value: production # makes server.js use Render's PORT
+      - key: NODE_VERSION
+        value: "24"
+      - key: CATALOG_PROVIDER
+        value: mock # start on the demo catalogue; switch to "spotify" later (guide step 7)
+      - key: TRUST_PROXY
+        value: "1" # one proxy (Render's) in front of the app, so per-IP rate limits see real visitors
+      # The client's address, e.g. https://<your-vercel-project>.vercel.app (comma-separate several)
+      - key: CLIENT_ORIGIN
+        sync: false
+      # Only for CATALOG_PROVIDER=spotify
+      - key: SPOTIFY_CLIENT_ID
+        sync: false
+      - key: SPOTIFY_CLIENT_SECRET
+        sync: false
+      - key: SPOTIFY_MARKET
+        sync: false
+      # Only for accounts (Supabase); leave all empty to run without accounts
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSL_CA
+        sync: false

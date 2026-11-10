@@ -10,6 +10,7 @@ import LibraryFilters from '../components/library/LibraryFilters.jsx'
 import lib from '../components/library/library.module.css'
 import { useCollections, useEntries, useLibrary } from '../hooks/useLibrary.js'
 import { usePageTitle } from '../hooks/usePageTitle.js'
+import { useSession } from '../stores/sessionStore.js'
 import { pluralize } from '../utils/format.js'
 import { DEFAULT_LIBRARY_SORT, LIBRARY_SORTS, STATUS_KEYS, entrySummary, filterEntries, libraryFacets, sortEntries } from '../utils/library.js'
 import s from './pages.module.css'
@@ -24,6 +25,8 @@ export default function Library() {
   const entries = useEntries()
   const collections = useCollections()
   const storageOk = useLibrary((state) => state.storageOk)
+  const inAccount = useSession((state) => state.status === 'signedIn' || state.status === 'expired')
+  const loadingAccount = useSession((state) => state.loadingLibrary)
   const [searchParams, setSearchParams] = useSearchParams()
 
   const view = searchParams.get('view') === 'collections' ? 'collections' : 'albums'
@@ -50,7 +53,7 @@ export default function Library() {
     <>
       <h1 className={s.pageTitle}>Your library</h1>
       <p className={s.pageSubtitle}>
-        {pluralize(entries.length, 'album')} · {pluralize(collections.length, 'collection')} · kept in this browser
+        {pluralize(entries.length, 'album')} · {pluralize(collections.length, 'collection')} · {inAccount ? 'saved in your account' : 'kept in this browser'}
       </p>
       {!storageOk && (
         <p className={lib.warning} role="alert">
@@ -71,6 +74,8 @@ export default function Library() {
       <div role="tabpanel" id="tabpanel" aria-labelledby={`tab-${view}`} className={s.tabPanel}>
         {view === 'collections' ? (
           <CollectionList collections={collections} />
+        ) : entries.length === 0 && loadingAccount ? (
+          <p role="status">Loading your library…</p>
         ) : entries.length === 0 ? (
           <EmptyState icon={LibraryIcon} title="Your library is empty" message="Use the bookmark on any album card, or the Save button on an album page, to keep it here.">
             <Link to="/search" className={common.button}>

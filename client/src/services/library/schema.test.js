@@ -51,6 +51,14 @@ describe('librarySchema', () => {
     expect(issues(bad)).toEqual([{ path: 'entries.a.album.spotifyUrl', message: 'Must be a web address' }])
   })
 
+  test('rejects "//" links, which point to another site, but accepts paths on this site', () => {
+    const external = library({ entries: { a: entry('a', {}, { coverUrl: '//evil.example/x.png' }) }, collections: [] })
+    const local = library({ entries: { a: entry('a', {}, { coverUrl: '/api/mock/art/a.svg' }) }, collections: [] })
+
+    expect(issues(external)).toEqual([{ path: 'entries.a.album.coverUrl', message: 'Must be a web address' }])
+    expect(librarySchema.safeParse(local).success).toBe(true)
+  })
+
   test('rejects repeated or badly formatted tags', () => {
     expect(issues(library({ entries: { a: entry('a', { tags: ['x', 'x'] }) }, collections: [] }))[0].message).toBe('Tags must not repeat')
     expect(issues(library({ entries: { a: entry('a', { tags: ['Loud'] }) }, collections: [] }))[0].path).toBe('entries.a.tags.0')

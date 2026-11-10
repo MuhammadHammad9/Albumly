@@ -3,6 +3,7 @@
 // so tests use an in-memory one and a later phase can swap in one backed by the server.
 import { createStore } from 'zustand/vanilla'
 import { createLocalRepository } from '../services/library/localRepository.js'
+import { createRepositorySwitch } from '../services/library/repositorySwitch.js'
 import { LIBRARY_VERSION } from '../services/library/schema.js'
 import { LIMITS, STATUS_KEYS, findSimilar, moveItem, normalizeTag, toSnapshot } from '../utils/library.js'
 
@@ -185,5 +186,10 @@ export function createLibraryStore(repository, { now = () => new Date().toISOStr
   return store
 }
 
-// The one library the app uses, kept in this browser
-export const libraryStore = createLibraryStore(createLocalRepository())
+// The browser's own library (used when nobody is signed in)
+export const localLibrary = createLocalRepository()
+
+// The one library the app uses. It reads and writes through a switch: the browser library by
+// default, the account library while signed in (services/session.js does the switching).
+export const librarySource = createRepositorySwitch(localLibrary)
+export const libraryStore = createLibraryStore(librarySource)

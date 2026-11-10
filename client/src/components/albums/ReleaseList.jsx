@@ -2,6 +2,7 @@ import { ExternalLink } from 'lucide-react'
 import { Link } from 'react-router'
 import { formatReleaseDate, pluralize, releaseTypeLabel } from '../../utils/format.js'
 import Artwork from '../common/Artwork.jsx'
+import SaveToggle from '../library/SaveToggle.jsx'
 import Editions from './Editions.jsx'
 import s from './explorer.module.css'
 
@@ -27,6 +28,8 @@ export default function ReleaseList({ groups, showArtist = false }) {
               <span className={s.rowDate}>{formatReleaseDate(release.releaseDate, release.precision)}</span>
               <span className={s.rowTracks}>{pluralize(release.totalTracks, 'track')}</span>
             </Link>
+            {/* Outside the link, so saving never opens the album */}
+            <SaveToggle album={release} />
             <a href={release.spotifyUrl} target="_blank" rel="noreferrer" className={s.rowExternal} aria-label={`Open ${release.name} on Spotify`}>
               <ExternalLink size={16} aria-hidden="true" />
             </a>

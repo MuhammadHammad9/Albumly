@@ -14,11 +14,12 @@ export class LibraryFormatError extends Error {}
 
 export const emptyLibrary = () => ({ version: LIBRARY_VERSION, entries: {}, collections: [] })
 
-// Links only: an imported file must not be able to sneak in a "javascript:" address
+// Links only: an imported file must not be able to sneak in a "javascript:" address.
+// A path on this site must start with a single "/": "//other.site/x" would point to another site.
 const webAddress = z
   .string()
   .max(2000)
-  .refine((value) => value === '' || /^(https?:\/\/|\/)/i.test(value), 'Must be a web address')
+  .refine((value) => value === '' || /^(https?:\/\/|\/(?!\/))/i.test(value), 'Must be a web address')
 
 const timestamp = z.iso.datetime({ error: 'Must be a date and time (ISO 8601)' })
 const limited = (max) => z.string().max(max, `Must be at most ${max} characters`)

@@ -1,0 +1,478 @@
+/* Styles shared by the Discover pages (recommendations, insights, calendar, connections) */
+
+.subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.subnavLink {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.subnavLink:hover {
+  color: var(--text-primary);
+}
+
+.subnavLink[aria-current='page'] {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+}
+
+.note {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-5);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.panel {
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-card);
+}
+
+.panel > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.panelBody {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.panelTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: var(--space-3);
+}
+
+.muted {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+/* ---------- quiz ---------- */
+
+.fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.legend {
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.pill {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.pill:hover {
+  color: var(--text-primary);
+}
+
+.pill[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.input {
+  width: min(320px, 100%);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* ---------- weights ---------- */
+
+.slider {
+  display: grid;
+  grid-template-columns: 140px 1fr 40px;
+  gap: var(--space-3);
+  align-items: center;
+  font-size: 14px;
+}
+
+.slider input {
+  accent-color: var(--accent);
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .slider {
+    grid-template-columns: 1fr 40px;
+  }
+  .slider label {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---------- recommendations ---------- */
+
+.results {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+}
+
+.result {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-card);
+}
+
+@media (max-width: 640px) {
+  .result {
+    grid-template-columns: 72px 1fr;
+  }
+  .resultSave {
+    grid-column: 2;
+  }
+}
+
+.resultTitle {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.resultTitle a:hover,
+.inlineLink:hover {
+  text-decoration: underline;
+}
+
+.score {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.reasons {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-4);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.why {
+  margin-top: var(--space-2);
+  font-size: 14px;
+}
+
+.why > summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.breakdown {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  list-style: none;
+  padding: 0;
+}
+
+.breakdownRow {
+  display: grid;
+  grid-template-columns: 120px 1fr 110px;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: 13px;
+}
+
+.track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bg-hover);
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--accent);
+}
+
+/* ---------- insights ---------- */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(160px, 100%), 1fr));
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin-bottom: var(--space-5);
+}
+
+.tile {
+  padding: var(--space-4);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-card);
+}
+
+.tileValue {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.tileLabel {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.chart {
+  height: 220px;
+}
+
+.table {
+  width: 100%;
+  margin-top: var(--space-3);
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.table th,
+.table td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.table td:last-child,
+.table th:last-child {
+  text-align: right;
+}
+
+.dna {
+  padding: var(--space-5);
+  border-radius: var(--radius-card);
+  background: linear-gradient(135deg, rgba(29, 185, 84, 0.18), rgba(139, 92, 246, 0.18)), var(--bg-secondary);
+  margin-bottom: var(--space-5);
+}
+
+.dnaHeadline {
+  font-size: 26px;
+  font-weight: 800;
+  margin: var(--space-1) 0 var(--space-4);
+}
+
+.traits {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.traits dt {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.traits dd {
+  margin: 0;
+}
+
+.traitValue {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.traitDetail {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+/* ---------- eras ---------- */
+
+.eras {
+  display: grid;
+  gap: var(--space-4);
+  list-style: none;
+  padding: 0;
+}
+
+.era {
+  padding: var(--space-4);
+  border-left: 3px solid var(--accent-secondary);
+  background: var(--bg-secondary);
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+}
+
+.eraHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: baseline;
+}
+
+.eraTitle {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.eraList {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-4);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.role {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+/* ---------- graph ---------- */
+
+.graphLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .graphLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.graph {
+  width: 100%;
+  height: auto;
+  max-width: 560px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-card);
+}
+
+.graph a:focus-visible circle {
+  stroke: var(--text-primary);
+  stroke-width: 3;
+}
+
+.connectionList {
+  margin: 0;
+  padding-left: var(--space-4);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ---------- calendar ---------- */
+
+.months {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+}
+
+.month {
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-card);
+}
+
+.monthTitle {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+
+.monthEmpty {
+  opacity: 0.55;
+}
+
+.dayList {
+  display: grid;
+  gap: var(--space-1);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+}
+
+.day {
+  display: inline-block;
+  min-width: 2.5em;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.select {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.status {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.statusWarning {
+  color: var(--danger);
+}

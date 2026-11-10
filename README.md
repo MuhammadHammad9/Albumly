@@ -35,6 +35,17 @@ The client runs on http://localhost:5173 and the API on http://localhost:5000 (c
 
 Copy `server/.env.example` to `server/.env` to change settings. The demo catalogue needs no Spotify credentials. For live data, fill in the Spotify settings, set `CATALOG_PROVIDER=spotify`, and run `npm run spike` in `server/` to check your app works.
 
+## Accounts setup (optional)
+
+Without these settings, Albumly runs without accounts and keeps the library in the browser. To turn accounts on, create a free Supabase project by following the steps in `docs/plans/phase-5-plan.md` §10. Then fill in:
+
+| File | Variables |
+| --- | --- |
+| `server/.env` (git-ignored) | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` (secret), `DATABASE_URL` (secret), `DATABASE_SSL_CA` |
+| `client/.env.local` (git-ignored; public values only) | `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` |
+
+Then run `npm run db:migrate --prefix server` to create the tables, and `npm run live-check --prefix server` for an end-to-end check with two throwaway accounts that are deleted afterwards. How it works: `docs/phase-5-concepts.md`.
+
 ## Scripts
 
 | Command | What it does |

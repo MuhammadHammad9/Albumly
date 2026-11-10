@@ -3,6 +3,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router'
 import { router } from './router.jsx'
+import { session } from './services/session.js'
 import './styles/global.css'
 
 const queryClient = new QueryClient({
@@ -18,6 +19,9 @@ const queryClient = new QueryClient({
     },
   },
 })
+
+// Before the first render: a returning signed-in user sees their account library straight away
+session.start()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -10,6 +10,7 @@ import { usePageTitle } from '../hooks/usePageTitle.js'
 import { recents } from '../services/recents.js'
 import { discographyTotal } from '../utils/discography.js'
 import { pluralize } from '../utils/format.js'
+import ArtistIntelligence from '../components/intelligence/ArtistIntelligence.jsx'
 import NotFound from './NotFound.jsx'
 import s from './pages.module.css'
 
@@ -81,6 +82,9 @@ export default function Artist() {
         {/* key: a different artist gets a fresh explorer rather than inheriting the last one's state */}
         <Discography key={id} artistId={id} />
       </section>
+
+      {/* Eras, connections and recommendations for this artist (Phase 6) */}
+      <ArtistIntelligence key={id} artistId={id} />
     </>
   )
 }

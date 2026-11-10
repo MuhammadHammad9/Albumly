@@ -1,5 +1,6 @@
 import 'dotenv/config'
 import { createApp } from './app.js'
+import { createAccounts, readAccountsConfig } from './config/accounts.js'
 import { getProvider } from './providers/index.js'
 
 // Hosting platforms inject PORT, so it is honoured in production only. In development some
@@ -16,6 +17,24 @@ try {
   process.exit(1)
 }
 
-createApp().listen(PORT, () => {
-  console.log(`Albumly API listening on http://localhost:${PORT} (catalogue: ${provider.name})`)
+// Accounts are optional: without the Supabase settings the API runs in local-only mode, exactly
+// as before. Only variable names are printed, never their values.
+let accounts = null
+const accountsConfig = readAccountsConfig()
+if (accountsConfig.ok) {
+  try {
+    accounts = await createAccounts(accountsConfig)
+  } catch (error) {
+    console.error(`Accounts disabled: ${error.message}`)
+  }
+} else {
+  console.log(`Accounts disabled: ${accountsConfig.problem ?? `${accountsConfig.missing.join(', ')} not set`}`)
+}
+
+// TRUST_PROXY: how many proxies sit in front of the API when hosted ("1" on most platforms)
+const rawTrust = process.env.TRUST_PROXY?.trim()
+const trustProxy = rawTrust ? (/^\d+$/.test(rawTrust) ? Number(rawTrust) : rawTrust) : undefined
+
+createApp({ accounts, trustProxy }).listen(PORT, () => {
+  console.log(`Albumly API listening on http://localhost:${PORT} (catalogue: ${provider.name}, accounts: ${accounts ? 'on' : 'off'})`)
 })

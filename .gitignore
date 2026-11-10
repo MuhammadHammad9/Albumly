@@ -16,3 +16,12 @@ Thumbs.db
 
 # Cached Spotify responses (server/.cache)
 .cache
+
+# Supabase CA certificate (downloaded per project)
+server/certs/
+
+# Playwright output
+e2e/test-results/
+e2e/playwright-report/
+e2e/.dist/
+e2e/lighthouse/

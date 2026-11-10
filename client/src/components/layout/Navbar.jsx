@@ -1,5 +1,6 @@
 import { Disc3 } from 'lucide-react'
 import { Link } from 'react-router'
+import AccountButton from '../account/AccountButton.jsx'
 import SearchBar from '../common/SearchBar.jsx'
 import s from './layout.module.css'
 
@@ -11,6 +12,7 @@ export default function Navbar() {
         <Disc3 size={28} aria-hidden="true" />
       </Link>
       <SearchBar />
+      <AccountButton />
     </header>
   )
 }

@@ -9,6 +9,7 @@ export function apiNotFound(req, res, next) {
 // (Express recognises an error handler by its four arguments, so `next` must stay.)
 // eslint-disable-next-line no-unused-vars
 export function errorHandler(err, req, res, next) {
+  err = fromBodyParser(err)
   if (err instanceof ApiError) {
     const error = { code: err.code, message: err.message }
     if (err.retryAfter !== undefined) {
@@ -20,4 +21,12 @@ export function errorHandler(err, req, res, next) {
 
   console.error(err)
   res.status(500).json({ error: { code: 'internal_error', message: 'Something went wrong' } })
+}
+
+// Errors from express.json(): a body that is too large or is not valid JSON is the caller's
+// mistake (4xx), not a server crash (500)
+function fromBodyParser(err) {
+  if (err?.type === 'entity.too.large') return new ApiError(413, 'payload_too_large', 'The request is too large.')
+  if (err?.type === 'entity.parse.failed') return new ApiError(400, 'bad_request', 'The request body is not valid JSON.')
+  return err
 }

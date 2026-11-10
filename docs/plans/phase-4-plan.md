@@ -41,7 +41,7 @@ Key `albumly:library`. The payload carries its own version so migrations can run
 ```
 
 - This mirrors PRD §6.2 (`library_entries`, `collections`, `collection_albums.position` = array index), so Phase 5's upload is a straight mapping.
-- Rules: adding an album to a collection also saves it. Removing an album from the library also removes it from every collection, after a `confirm()` if it has data worth losing (rating, review, notes, tags or collections).
+- Rules: adding an album to a collection also saves it. Removing an album from the library also removes it from every collection, after an in-page confirm step (not `window.confirm`) if it has data worth losing (rating, review, notes, tags or collections).
 - Limits enforced by the schema: rating is a whole number from 1 to 10. Review and notes are at most 5000 characters. Tags are trimmed, lowercase, unique, at most 30 characters each and 20 per album. A collection name is 1–60 characters, unique regardless of case.
 - **Migrations**: `migrate(raw, migrations = MIGRATIONS)` runs `MIGRATIONS[n]` (n → n+1) until it reaches `LIBRARY_VERSION`.
   - Data with no version or an unknown version is rejected.
